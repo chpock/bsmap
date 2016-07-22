@@ -25,7 +25,20 @@ function App(){
       zoomend: this.autocompleteBound, 
       zoomlevelschange: this.autocompleteBound,
       resize: this.autocompleteBound,
-      click: this.buildBS
+      click: function(ev){
+        var self = this;
+        if (this.panel.current_button !== 1) return;
+        if (this.build_timer) return;
+        this.build_timer = setTimeout(function(){
+          delete self.build_timer;
+          self.buildBS.call(self,ev);
+        }, 250);
+      },
+      dblclick: function(){
+        if (!this.build_timer) return;
+        clearTimeout(this.build_timer);
+        delete this.build_timer;
+      }
     }, this)
     .addLayer(this.layers['Visicom'])
     .addControl(new L.Control.Layers(this.layers))
@@ -54,7 +67,7 @@ function App(){
   if ($.localStorage.isSet('tbl_bs') && !$.localStorage.isEmpty('tbl_bs')) {
     try {
       $.localStorage.get('tbl_bs').forEach(function(o){
-        o['polygon'] = self.add_bs_polygon(o.location, o.azimut, o.size);
+        o['polygon'] = self.add_bs_polygon(o.location, o.azimut, o.size, o.color);
         o['marker'] = self.add_bs_marker(o.location, o.title);
         self.tbl_bs.push(o);
       });
@@ -101,10 +114,9 @@ App.prototype = {
   resizeBS: function(bs, inc) {
     bs.size = bs.size + inc;
     this.map.removeLayer(bs.polygon);
-    bs.polygon = this.add_bs_polygon(bs.location, bs.azimut, bs.size);  
+    bs.polygon = this.add_bs_polygon(bs.location, bs.azimut, bs.size, bs.color);  
   },
   buildBS: function(ev) {
-    if (this.panel.current_button !== 1) return;
     var azimut = parseInt($('.tab-panel-input-azimut').val(),10);
     if (isNaN(azimut) || azimut < 0 || azimut > 360) {
       noty({
@@ -122,9 +134,10 @@ App.prototype = {
       location: ev.latlng,
       azimut: azimut,
       title: ev.latlng.lat + ', ' + ev.latlng.lng,
+      color: this.panel.colorPickerGet(),
       size: 500
     };
-    bs.polygon = this.add_bs_polygon(bs.location, bs.azimut, bs.size);
+    bs.polygon = this.add_bs_polygon(bs.location, bs.azimut, bs.size, bs.color);
     bs.marker = this.add_bs_marker(bs.location, '');
 
     this.tbl_bs.push(bs);
@@ -194,7 +207,7 @@ App.prototype = {
 //      [place.geometry.viewport.getNorthEast().lat(),place.geometry.viewport.getNorthEast().lng()]
 //    ]);
   },
-  add_bs_polygon: function(location, azimut, size) {
+  add_bs_polygon: function(location, azimut, size, color) {
     var points = [];
     points.push(location);
     var lat = (location.lat * Math.PI) / 180;
@@ -213,12 +226,13 @@ App.prototype = {
       destLat = (destLat * 180) / Math.PI;
       points.push(new L.LatLng(destLat, destLng));
     };
+//    var pcolor = jQuery.Color(color).lightness(jQuery.Color(color).lightness()*1.2).toRgbaString();
     var polygon = L.polygon(points,{
       stroke: true,
       weight: 1,
-      color: '#004de8',
-      opacity: 0.62,
-      fillColor: '#004de8',
+      color: color,
+      opacity: 0.7,
+      fillColor: color,
       fillOpacity: 0.27,
       clickable: true
     }).addTo(this.map);
@@ -259,7 +273,7 @@ App.prototype = {
           break;
       this.tbl_bs[i].location = ev.target.getLatLng();
       this.map.removeLayer(app.tbl_bs[i].polygon);
-      this.tbl_bs[i].polygon = this.add_bs_polygon(this.tbl_bs[i].location, this.tbl_bs[i].azimut, this.tbl_bs[i].size);
+      this.tbl_bs[i].polygon = this.add_bs_polygon(this.tbl_bs[i].location, this.tbl_bs[i].azimut, this.tbl_bs[i].size, this.tbl_bs[i].color);
       this.save_current_state('tbl_bs');
       this.updateBSTitle(this.tbl_bs[i]);
     },this);

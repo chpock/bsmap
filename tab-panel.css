@@ -44,6 +44,8 @@
 }
 .tab-panel-inputbar {
   padding: 5px;
+  display: flex;
+  align-items: center; 
 }
 .tab-panel-label {
   padding-right: 5px;
@@ -66,6 +68,7 @@
 .tab-panel-input-azimut {
   -moz-border-radius: 7px;
   -webkit-border-radius: 7px;
+  border-radius: 7px;
   width: 50px;
 
   border: 1px solid #000000;
@@ -73,4 +76,7 @@
   padding-bottom: 3px;
   padding-left: 5px;
   padding-right: 5px;
+}
+.map-cursor-pointer {
+  cursor: default;
 }

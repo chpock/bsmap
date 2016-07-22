@@ -24,10 +24,12 @@ L.Control.Panel = L.Control.extend({
     L.DomEvent.addListener(this.buttons[0], 'click', function(ev){ 
       L.DomEvent.stopPropagation(ev);
       this._selectPanel(0);
+      $('.leaflet-container').removeClass('map-cursor-pointer');
     }, this);
     L.DomEvent.addListener(this.buttons[1], 'click', function(ev){ 
       L.DomEvent.stopPropagation(ev);
       this._selectPanel(1);
+      $('.leaflet-container').addClass('map-cursor-pointer');
     }, this);
 
     var inputbar = this.inputs[0] = L.DomUtil.create('div', 'tab-panel-inputbar', container);
@@ -40,6 +42,11 @@ L.Control.Panel = L.Control.extend({
     var inputbar = this.inputs[1] = L.DomUtil.create('div', 'tab-panel-inputbar', container);
     L.DomUtil.create('span', 'tab-panel-label', inputbar).innerHTML = "Азимут:";
     L.DomUtil.create('input', 'tab-panel-input-azimut', inputbar).value = '0';
+    var label = L.DomUtil.create('span', 'tab-panel-label', inputbar);
+    label.style.marginLeft = '10px';
+    label.innerHTML = "Цвет сектора:"
+    this.colorpicker = this.colorPickerSet('#0000ff', this.colorPicker());
+    inputbar.appendChild(this.colorpicker);
     container.removeChild(inputbar);
 
     L.DomEvent.disableClickPropagation(container);
@@ -53,5 +60,47 @@ L.Control.Panel = L.Control.extend({
     L.DomUtil.addClass(this.buttons[bid], 'tab-panel-button-active');
     this._container.appendChild(this.inputs[bid]);
     this.current_button = bid;
+  },
+
+  colorPicker: function(callback) {
+    var self = this;
+    if (!callback) callback = function(){};
+    var colors = ['#777777','#000000','#ff00ff', '#ff0000','#9000ff','#ff6c00','#ffff00','#00ff00','#00aa00','#00ffdd','#0000ff'];
+    var container = document.createElement('div');
+    container.style.display = 'inline-block';
+    colors.forEach(function(color){
+      var el = document.createElement('div');
+      el.style.backgroundColor = color;
+      el.style.width = '16px';
+      el.style.height = '16px';
+      el.style.float = 'left';
+      el.style.border = '1px solid #000000';
+      el.style.margin = '2px 2px 2px 2px';
+      $(el).click(function(){
+        for (var i = 0; i < container.children.length; i++) container.children[i].style.outline = '';
+        el.style.outline = '2px solid #000000';
+        callback.call(self,color);
+      });
+      container.appendChild(el);
+    });
+    return container;
+  },
+
+  colorPickerSet: function(color, cp) {
+    if (!cp) cp = this.colorpicker;
+    var el = document.createElement('div');
+    el.style.backgroundColor = color;
+    color = el.style.backgroundColor;
+    el.remove();
+    for (var i = 0; i < cp.children.length; i++) if (cp.children[i].style.backgroundColor === color) break;
+    if (i === cp.children.length) return cp;
+    for (var j = 0; j < cp.children.length; j++) cp.children[j].style.outline = i === j ? '2px solid #000000' : '';
+    return cp;
+  },
+
+  colorPickerGet: function(cp) {
+    if (!cp) cp = this.colorpicker;
+    for (var i = 0; i < cp.children.length; i++) if (cp.children[i].style.outline !== '') return cp.children[i].style.backgroundColor;
+    return '#000000';
   }
 });

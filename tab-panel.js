@@ -70,6 +70,7 @@ L.Control.Panel = L.Control.extend({
     container.style.display = 'inline-block';
     colors.forEach(function(color){
       var el = document.createElement('div');
+      el.style.display = 'inline-block';
       el.style.backgroundColor = color;
       el.style.width = '16px';
       el.style.height = '16px';

@@ -38,7 +38,7 @@ L.Control.Panel = L.Control.extend({
     }, this);
 
     var inputbar = this.inputs[1] = L.DomUtil.create('div', 'tab-panel-inputbar', container);
-    L.DomUtil.create('span', 'tab-panel-label', inputbar).innerText = "Азимут:";
+    L.DomUtil.create('span', 'tab-panel-label', inputbar).innerHTML = "Азимут:";
     L.DomUtil.create('input', 'tab-panel-input-azimut', inputbar).value = '0';
     container.removeChild(inputbar);
 

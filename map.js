@@ -164,11 +164,11 @@ App.prototype = {
     this.autocompleteBound();
 
     if (place.address_components) {
-      var address = [
+      var address = this.stripAddress([
         (place.address_components[0] && place.address_components[0].short_name || ''),
         (place.address_components[1] && place.address_components[1].short_name || ''),
         (place.address_components[2] && place.address_components[2].short_name || '')
-      ].join(',');
+      ].join(', '));
     } else {
       var address = '';
     };
@@ -301,8 +301,8 @@ App.prototype = {
       c3.style.textAlign = 'right';
       c4.style.width = '12px';
       c1.innerHTML = i+1 + '.'
-      c2.innerHTML = o.title;
-      c3.innerHTML = o.azimut;
+      c2.innerHTML = self.escapeHTML(o.title);
+      c3.innerHTML = self.escapeHTML(o.azimut);
       var icon = L.DomUtil.create('img', 'panel-item-close', c4);
       icon.src = 'images/close.png';
       var dec = L.DomUtil.create('img', 'panel-item-close', c0);
@@ -355,7 +355,7 @@ App.prototype = {
       c1.style.width = '1.5em';
       c3.style.width = '12px';
       c1.innerHTML = i+1 + '.'
-      c2.innerHTML = o.title;
+      c2.innerHTML = self.escapeHTML(o.title);
       var icon = L.DomUtil.create('img', 'panel-item-close', c3);      
       icon.src = 'images/close.png';
       L.DomEvent.addListener(line, 'click', function(ev) {
@@ -407,15 +407,24 @@ App.prototype = {
   },
   stripAddress: function(str) {
     var tbl = {
-      " улица":" ул.",
       "улица ":"ул.",
-      "проспект":"пр-т",
-      "бульвар":"б-р",
+      " улица":" ул.",
+      "вулиця ":"вул.",
+      " вулиця":" вул.",
+      "провулок ":"пров.",
+      " провулок":" пров.",
       "переулок ":"пер.",
       " переулок":" пер.",
+      "район":"р-н",
+      "проспект":"пр-т",
+      "бульвар":"б-р"
     };
     var re = new RegExp(Object.keys(tbl).join("|"),"gi");
     return str.replace(re, function(matched){ return tbl[matched]; });
+  },
+  escapeHTML: function(str) {
+    if (typeof str === "string") str.replace(/&/g, '&amp;').replace(/>/g, '&gt;').replace(/</g, '&lt;'); 
+    return str;
   }
 };
 

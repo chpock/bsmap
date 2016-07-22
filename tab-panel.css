@@ -1,32 +1,32 @@
 .tab-panel {
-	-moz-border-radius: 7px;
-	-webkit-border-radius: 7px;
-	border-radius: 7px;
-	border: 1px solid #999999;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  border-radius: 7px;
+  border: 1px solid #999999;
 
-	padding: 5px;
-	background-color: #dfdfdf;
+  padding: 5px;
+  background-color: #dfdfdf;
 
-	box-shadow: 3px 3px 5px rgba(0,0,0,0.5);
+  box-shadow: 3px 3px 5px rgba(0,0,0,0.5);
 }
 .tab-panel-buttonbar {
   padding: 5px;
 }
 .tab-panel-button {
-	-moz-border-radius: 7px;
-	-webkit-border-radius: 7px;
-	border-radius: 7px;
-	border: 1px solid #000000;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  border-radius: 7px;
+  border: 1px solid #000000;
 
-	padding-top: 3px;
-	padding-bottom: 3px;
-	padding-left: 10px;
-	padding-right: 10px;
-	margin: 5px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  padding-left: 10px;
+  padding-right: 10px;
+  margin: 5px;
 
-	background-color: #ffffff;
+  background-color: #ffffff;
 
-	cursor: pointer;
+  cursor: pointer;
 
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -36,7 +36,7 @@
   user-select: none; 
 }
 .tab-panel-button-active {
-	background-color: #ddddff;
+  background-color: #ddddff;
   border: 1px solid #0000ff;
 }
 .tab-panel-button:hover {
@@ -49,9 +49,9 @@
   padding-right: 5px;
 }
 .tab-panel-input-address {
-	-moz-border-radius: 7px;
-	-webkit-border-radius: 7px;
-	border-radius: 7px;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  border-radius: 7px;
   width: 400px;
 
   border: 1px solid #000000;
@@ -64,8 +64,8 @@
   border: 1px solid #ff0000;
 }
 .tab-panel-input-azimut {
-	-moz-border-radius: 7px;
-	-webkit-border-radius: 7px;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
   width: 50px;
 
   border: 1px solid #000000;

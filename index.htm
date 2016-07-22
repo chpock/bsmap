@@ -1,0 +1,113 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<style>
+html, body {
+  height: 100%
+}
+body {
+  display: flex;
+	padding: 0;
+  margin: 0;
+}
+#map {
+  flex-grow: 1;
+  background: #ffffff;
+
+  outline: 1px solid #000000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center; 
+}
+.panel {
+  width: 300px;
+  background: #eeeeee;
+  outline: 1px solid #000000;
+
+  cursor: default;
+}
+.panel-header {
+  background: #dddddd;
+  width: calc(100% - 22px);
+  padding: 5px;
+  margin: 5px; 
+  border: 1px solid #000000;
+	font: bold 100% "Helvetica Neue", Arial, Helvetica, sans-serif;
+
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none; 
+
+	white-space: nowrap;
+}
+.panel-table {
+  padding: 2px;
+  margin: 5px; 
+  width: 290px;
+  border: 0px;
+	font: normal 9pt "Helvetica Neue", Arial, Helvetica, sans-serif;
+
+	cursor: pointer;
+
+	border-spacing: 0px 3px;
+  table-layout: fixed;
+}
+.panel-item {
+}
+.panel-column {
+	overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+5}
+.panel-item-active {
+  background: #ddddee;
+}
+.panel-item:hover {
+  outline: 1px solid #000099;
+}
+.panel-item-close {
+}
+</style>
+<link rel="stylesheet" href="libs/leaflet/leaflet.css">
+<link rel="stylesheet" href="loading.css">
+<link rel="stylesheet" href="tab-panel.css">
+<script src="libs/jquery/jquery-3.1.0.min.js"></script>
+<script src="libs/jquery/plugins/jquery.storageapi.min.js"></script>
+<script src="libs/jquery/plugins/jquery.noty.packaged.min.js"></script>
+<script src="libs/leaflet/leaflet.js"></script>
+<script src="tab-panel.js"></script>
+<script src="noty.theme.js"></script>
+<script>
+  function initGoogle(){
+    console.log('initGoogle callback...');
+    $(document).ready(function(){
+      if (app && app.map) app.initGoogle();
+    });
+  };
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCzp7Vj3L_h1JAKS2_9Xh7Pn1rD2Tj7iL0&callback=initGoogle&language=ru&libraries=places" type="text/javascript"></script>
+<script src="http://api-maps.yandex.ru/2.0/?load=package.map&lang=ru-RU" type="text/javascript"></script>
+<script src="libs/leaflet/plugins/layer/tile/Yandex.js"></script>
+<script src="libs/leaflet/plugins/layer/tile/Google.js"></script>
+</head>
+<body>
+<div id="map">
+	<div class="cssload-loader">
+	  Загрузка карты...
+		<div class="cssload-inner cssload-one"></div>
+		<div class="cssload-inner cssload-two"></div>
+		<div class="cssload-inner cssload-three"></div>
+	</div>
+</div>
+<div class="panel">
+<div class="panel-header">Базовые станции</div><table class="panel-table" id="tbl_bs"></table>
+<div class="panel-header">Адреса</div><table class="panel-table" id="tbl_address"></table>
+<div class="panel-header">Сохранено</div><div id="tbl_save"></div>
+</div>
+<script src="map.js"></script>
+</body>
+</html>

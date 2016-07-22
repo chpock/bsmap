@@ -1,0 +1,76 @@
+.tab-panel {
+	-moz-border-radius: 7px;
+	-webkit-border-radius: 7px;
+	border-radius: 7px;
+	border: 1px solid #999999;
+
+	padding: 5px;
+	background-color: #dfdfdf;
+
+	box-shadow: 3px 3px 5px rgba(0,0,0,0.5);
+}
+.tab-panel-buttonbar {
+  padding: 5px;
+}
+.tab-panel-button {
+	-moz-border-radius: 7px;
+	-webkit-border-radius: 7px;
+	border-radius: 7px;
+	border: 1px solid #000000;
+
+	padding-top: 3px;
+	padding-bottom: 3px;
+	padding-left: 10px;
+	padding-right: 10px;
+	margin: 5px;
+
+	background-color: #ffffff;
+
+	cursor: pointer;
+
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none; 
+}
+.tab-panel-button-active {
+	background-color: #ddddff;
+  border: 1px solid #0000ff;
+}
+.tab-panel-button:hover {
+  border: 1px solid #ff0000;
+}
+.tab-panel-inputbar {
+  padding: 5px;
+}
+.tab-panel-label {
+  padding-right: 5px;
+}
+.tab-panel-input-address {
+	-moz-border-radius: 7px;
+	-webkit-border-radius: 7px;
+	border-radius: 7px;
+  width: 400px;
+
+  border: 1px solid #000000;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+.address-notfound {
+  border: 1px solid #ff0000;
+}
+.tab-panel-input-azimut {
+	-moz-border-radius: 7px;
+	-webkit-border-radius: 7px;
+  width: 50px;
+
+  border: 1px solid #000000;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  padding-left: 5px;
+  padding-right: 5px;
+}

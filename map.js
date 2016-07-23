@@ -1,3 +1,6 @@
+/* jslint browser:true */
+/* jslist jquery:true */
+/* jslint sub:true */
 function App(){
 
   $('#map')[0].removeChild($('.cssload-loader')[0]);
@@ -20,9 +23,9 @@ function App(){
   })
     .on({
       load: this.autocompleteBound,
-      viewreset: this.autocompleteBound, 
-      dragend: this.autocompleteBound, 
-      zoomend: this.autocompleteBound, 
+      viewreset: this.autocompleteBound,
+      dragend: this.autocompleteBound,
+      zoomend: this.autocompleteBound,
       zoomlevelschange: this.autocompleteBound,
       resize: this.autocompleteBound,
       click: function(ev){
@@ -44,7 +47,7 @@ function App(){
     .addControl(new L.Control.Layers(this.layers))
     .addControl(new L.Control.Zoom({ position: "bottomleft" }));
 
-  this.panel = new L.Control.Panel()
+  this.panel = new L.Control.Panel();
   this.map.addControl(this.panel);
 
   this.tbl_address = [];
@@ -61,9 +64,9 @@ function App(){
       console.log('error while loading tbl_address:');
       console.log(err);
       this.tbl_address = [];
-    };
+    }
     this.redraw_address();
-  };
+  }
   if ($.localStorage.isSet('tbl_bs') && !$.localStorage.isEmpty('tbl_bs')) {
     try {
       $.localStorage.get('tbl_bs').forEach(function(o){
@@ -75,18 +78,18 @@ function App(){
       console.log('error while loading tbl_bs:');
       console.log(err);
       this.tbl_bs = [];
-    };
+    }
     this.redraw_bs();
-  };
+  }
   if ($.localStorage.isSet('map') && !$.localStorage.isEmpty('map')) {
     try {
       this.map.setView($.localStorage.get('map')['center'], $.localStorage.get('map')['zoom']);
     } catch (err) {
       console.log('error while setting map view:');
       console.log(err);
-    };
-  };
-};
+    }
+  }
+}
 
 App.prototype = {
   constructor: App,
@@ -97,7 +100,7 @@ App.prototype = {
       types: ['geocode'],
       componentRestrictions: {country: 'ua'}
     });
-    google.maps.event.addListener(this.autocomplete, 'place_changed', function(){ self.autocompleteChange.call(self) });
+    google.maps.event.addListener(this.autocomplete, 'place_changed', function(){ self.autocompleteChange.call(self); });
     this.autocompleteBound();
 
     this.geocoder = new google.maps.Geocoder();
@@ -114,7 +117,7 @@ App.prototype = {
   resizeBS: function(bs, inc) {
     bs.size = bs.size + inc;
     this.map.removeLayer(bs.polygon);
-    bs.polygon = this.add_bs_polygon(bs.location, bs.azimut, bs.size, bs.color);  
+    bs.polygon = this.add_bs_polygon(bs.location, bs.azimut, bs.size, bs.color);
   },
   buildBS: function(ev) {
     var azimut = parseInt($('.tab-panel-input-azimut').val(),10);
@@ -128,7 +131,7 @@ App.prototype = {
       });
       $('.tab-panel-input-azimut').focus();
       return;
-    };
+    }
 
     var bs = {
       location: ev.latlng,
@@ -153,38 +156,37 @@ App.prototype = {
       if (status != google.maps.GeocoderStatus.OK) {
         console.log('geocode wrong status: \'' + status);
         return;
-      };
+      }
       var address_components = [];
       for (var j = 0; j < results[0].address_components.length; j++) {
         if (results[0].address_components[j].types[0] == 'street_number' || results[0].address_components[j].types[0] == 'route')
           address_components.push(self.stripAddress(results[0].address_components[j].short_name));
-      };
-      if (address_components.length) {     
+      }
+      if (address_components.length) {
         bs.title = address_components.join(", ");
         self.save_current_state('tbl_bs');
         self.redraw_bs();
-      };
-    });    
+      }
+    });
   },
   autocompleteChange: function(){
     var place = this.autocomplete.getPlace();
     if (!place.geometry || !place.geometry.location) {
       L.DomUtil.addClass(this.panel.input_address, 'address-notfound');
       return;
-    };
+    }
 
     this.map.panTo([place.geometry.location.lat(),place.geometry.location.lng()]);
     this.autocompleteBound();
 
+    var address = '';
     if (place.address_components) {
-      var address = this.stripAddress([
+      address = this.stripAddress([
         (place.address_components[0] && place.address_components[0].short_name || ''),
         (place.address_components[1] && place.address_components[1].short_name || ''),
         (place.address_components[2] && place.address_components[2].short_name || '')
       ].join(', '));
-    } else {
-      var address = '';
-    };
+    }
 
     var location = L.latLng([place.geometry.location.lat(),place.geometry.location.lng()]);
 
@@ -218,14 +220,14 @@ App.prototype = {
     if ( azm_start < 0 ) {
       azm_start = 360 + azm_start;
       azm_end = 360 + azm_end;
-    };
+    }
     for (var x = azm_start; x <= azm_end; x++) { 
       var brng = (x % 360) * Math.PI / 180;
       var destLat = Math.asin(Math.sin(lat)*Math.cos(d) + Math.cos(lat)*Math.sin(d)*Math.cos(brng));
       var destLng = ((lon + Math.atan2(Math.sin(brng)*Math.sin(d)*Math.cos(lat), Math.cos(d)-Math.sin(lat)*Math.sin(destLat))) * 180) / Math.PI;
       destLat = (destLat * 180) / Math.PI;
       points.push(new L.LatLng(destLat, destLng));
-    };
+    }
 //    var pcolor = jQuery.Color(color).lightness(jQuery.Color(color).lightness()*1.2).toRgbaString();
     var polygon = L.polygon(points,{
       stroke: true,
@@ -236,7 +238,7 @@ App.prototype = {
       fillOpacity: 0.27,
       clickable: true
     }).addTo(this.map);
-    polygon.on('mouseover',function(){      
+    polygon.on('mouseover',function(){
       for (var i = 0; i < this.tbl_bs.length; i++)
         if (this.tbl_bs[i].polygon == polygon)
           break;
@@ -256,7 +258,7 @@ App.prototype = {
       keyboard: false,
       title: title
     }).addTo(this.map);
-    marker.on('mouseover',function(){      
+    marker.on('mouseover',function(){
       for (var i = 0; i < this.tbl_bs.length; i++)
         if (this.tbl_bs[i].marker == marker)
           break;
@@ -285,7 +287,7 @@ App.prototype = {
       keyboard: false,
       title: title
     }).addTo(this.map);
-    marker.on('mouseover',function(){      
+    marker.on('mouseover',function(){
       for (var i = 0; i < this.tbl_address.length; i++)
         if (this.tbl_address[i].marker == marker)
           break;
@@ -314,7 +316,7 @@ App.prototype = {
       c3.style.width = '1.9em';
       c3.style.textAlign = 'right';
       c4.style.width = '12px';
-      c1.innerHTML = i+1 + '.'
+      c1.innerHTML = i+1 + '.';
       c2.innerHTML = self.escapeHTML(o.title);
       c3.innerHTML = self.escapeHTML(o.azimut);
       var icon = L.DomUtil.create('img', 'panel-item-close', c4);
@@ -368,9 +370,9 @@ App.prototype = {
       var c3 = L.DomUtil.create('td','panel-column',line);
       c1.style.width = '1.5em';
       c3.style.width = '12px';
-      c1.innerHTML = i+1 + '.'
+      c1.innerHTML = i+1 + '.';
       c2.innerHTML = self.escapeHTML(o.title);
-      var icon = L.DomUtil.create('img', 'panel-item-close', c3);      
+      var icon = L.DomUtil.create('img', 'panel-item-close', c3);
       icon.src = 'images/close.png';
       L.DomEvent.addListener(line, 'click', function(ev) {
         this.map.panTo(o.location);
@@ -384,7 +386,7 @@ App.prototype = {
       L.DomEvent
         .addListener(icon, 'click', L.DomEvent.stopPropagation)
         .addListener(icon, 'click', L.DomEvent.preventDefault)
-        .addListener(icon, 'click', function(ev) {        
+        .addListener(icon, 'click', function(ev) {
           this.map.removeLayer(o.marker);
           this.tbl_address.splice(i,1);
           this.save_current_state('tbl_address');
@@ -401,7 +403,7 @@ App.prototype = {
         save_tbl_address.push(tmp);
       });
       $.localStorage.set('tbl_address', save_tbl_address);
-    };
+    }
     if (this.tbl_bs && (!save_type || save_type === 'tbl_bs')) {
       var save_tbl_bs = [];
       this.tbl_bs.forEach(function(o){
@@ -410,14 +412,14 @@ App.prototype = {
         save_tbl_bs.push(tmp);
       });
       $.localStorage.set('tbl_bs', save_tbl_bs);
-    };
+    }
     if (this.map && (!save_type || save_type === 'map')) {
       var save_map = {
         center: this.map.getCenter(),
         zoom: this.map.getZoom()
       };
       $.localStorage.set('map', save_map);
-    };
+    }
   },
   stripAddress: function(str) {
     var tbl = {

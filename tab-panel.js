@@ -32,22 +32,21 @@ L.Control.Panel = L.Control.extend({
       $('.leaflet-container').addClass('map-cursor-pointer');
     }, this);
 
-    var inputbar = this.inputs[0] = L.DomUtil.create('div', 'tab-panel-inputbar', container);
-    L.DomUtil.create('span', 'tab-panel-label', inputbar).innerText = "Адрес:";
-    this.input_address = L.DomUtil.create('input', 'tab-panel-input-address', inputbar);
+    this.inputs[0] = L.DomUtil.create('div', 'tab-panel-inputbar', container);
+    L.DomUtil.create('span', 'tab-panel-label', this.inputs[0]).innerHTML = "Адрес:";
+    this.input_address = L.DomUtil.create('input', 'tab-panel-input-address', this.inputs[0]);
     L.DomEvent.addListener(this.input_address, 'keydown', function(ev){
       L.DomUtil.removeClass(ev.currentTarget, 'address-notfound');
     }, this);
 
-    var inputbar = this.inputs[1] = L.DomUtil.create('div', 'tab-panel-inputbar', container);
-    L.DomUtil.create('span', 'tab-panel-label', inputbar).innerHTML = "Азимут:";
-    L.DomUtil.create('input', 'tab-panel-input-azimut', inputbar).value = '0';
-    var label = L.DomUtil.create('span', 'tab-panel-label', inputbar);
+    this.inputs[1] = L.DomUtil.create('div', 'tab-panel-inputbar');
+    L.DomUtil.create('span', 'tab-panel-label', this.inputs[1]).innerHTML = "Азимут:";
+    L.DomUtil.create('input', 'tab-panel-input-azimut', this.inputs[1]).value = '0';
+    var label = L.DomUtil.create('span', 'tab-panel-label', this.inputs[1]);
     label.style.marginLeft = '10px';
-    label.innerHTML = "Цвет сектора:"
+    label.innerHTML = "Цвет сектора:";
     this.colorpicker = this.colorPickerSet('#0000ff', this.colorPicker());
-    inputbar.appendChild(this.colorpicker);
-    container.removeChild(inputbar);
+    this.inputs[1].appendChild(this.colorpicker);
 
     L.DomEvent.disableClickPropagation(container);
 

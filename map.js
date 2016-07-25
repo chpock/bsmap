@@ -1,8 +1,149 @@
 /* jslint browser:true */
 /* jslist jquery:true */
 /* jslint sub:true */
-function App(){
 
+function ObjectMapBS(){
+  this.options = {};
+}
+ObjectMapBS.prototype = {
+  constructor: ObjectMapBS,
+  initOptions: function(options){
+    for (var k in options) {
+      if (options.hasOwnProperty(k)) this.options[k] = options[k];
+    }
+    return this;
+  },
+  saveToObject: function(){
+    return this.options;
+  },
+  loadFromObject: function(obj){
+    this.removeFromMap();
+    if (typeof obj !== 'undefined') {
+      for (var k in this.options) {
+        if (obj.hasOwnProperty(k)) {
+          this.options[k] = obj[k];
+        } else {
+          this.options[k] = null;
+        }
+      }
+    }
+    this.addToMap();
+    return this;
+  },
+  map: function () {
+     return this.collection ? this.collection.map : undefined;
+  },
+  escapeHTML: function(str) {
+    if (typeof str === "string") str.replace(/&/g, '&amp;').replace(/>/g, '&gt;').replace(/</g, '&lt;');
+    return str;
+  },
+  extend: function (cons, objs) {
+     console.log('extending...');
+     cons.prototype = Object.create(ObjectMapBS.prototype);
+     cons.prototype.constructor = cons;
+     for (var k in objs) if (objs.hasOwnProperty(k)) cons.prototype[k] = objs[k];
+  },
+// child functions
+  removeFromMap: function () {
+    return this;
+  },
+  addToMap: function () {
+    return this;
+  },
+  getPanelElement: function () {
+  }
+};
+
+function ObjectAddress(options){
+  console.log('object address init...');
+  ObjectMapBS.call(this);
+  console.log(this);
+  this.initOptions({
+    location: null,
+    title: ''
+  });
+  this.loadFromObject(options);
+}
+ObjectMapBS.prototype.extend(ObjectAddress,{
+  addToMap: function () {
+    if(this.map() && this.options.location) {
+      this.marker = L.marker(this.options.location, {
+        clickable: true,
+        keyboard: false,
+        title: this.options.title
+      }).addTo(this.map());
+
+      this.marker.on('mouseover',function(){
+        console.log('on...');
+        console.log(this.collection.indexOf(this));
+        L.DomUtil.addClass($('#tbl_address .panel-item')[this.collection.indexOf(this)], 'panel-item-active');
+        console.log('on end...');
+      }, this);
+
+      this.marker.on('mouseout',function(){
+        $('#tbl_address .panel-item-active').each(function(){
+          L.DomUtil.removeClass($(this)[0], 'panel-item-active');
+        });
+      }, this);
+    }
+    return this;
+  },
+
+  removeFromMap: function () {
+    if (this.marker) {
+      this.map().removeLayer(this.marker);
+    }
+    return this;
+  },
+
+  getPanelElement: function (container) {
+    var c1 = L.DomUtil.create('td', 'panel-column', container);
+    c2.innerHTML = this.escapeHTML(this.options.title);
+  }
+});
+
+
+function ObjectBSMapCollection(map){
+  this.objects = [];
+  this.length = 0;
+  this.map = map;
+}
+ObjectBSMapCollection.prototype = {
+  constructor: ObjectBSMapCollection,
+  item: function (i) {
+    return this.objects[i];
+  },
+  push: function (item) {
+    item.removeFromMap();
+    this.objects.push(item);
+    this.length++;
+    item.collection = this;
+    item.addToMap();
+    return this;
+  },
+  delete: function (i) {
+    item.removeFromMap();
+    delete item.collection;
+    this.objects.slice(i,1);
+    this.length--;
+    return this;
+  },
+  indexOf: function (item) {
+    for (var i = this.length - 1; i >= 0; i--) {
+      if (this.objects[i] === item) return i;
+    }
+    throw new Error('indexOf: item not in collection.');
+  },
+  loadFromObject: function(objs, cons) {
+    for (var i = 0; i < objs.length; i++) {
+      console.log(objs[i]);
+      this.push(new cons(objs[i]));
+    }
+    return this;
+  }
+};
+
+function App(){
   $('#map')[0].removeChild($('.cssload-loader')[0]);
   $('#map')[0].style['background-image'] = 'url(images/background.png)';
 
@@ -50,22 +191,12 @@ function App(){
   this.panel = new L.Control.Panel();
   this.map.addControl(this.panel);
 
-  this.tbl_address = [];
+  this.collection_address = new ObjectBSMapCollection(this.map);
   this.tbl_bs = [];
 
   var self = this;
   if ($.localStorage.isSet('tbl_address') && !$.localStorage.isEmpty('tbl_address')) {
-    try {
-      $.localStorage.get('tbl_address').forEach(function(o){
-        o['marker'] = self.add_address(o.location, o.address);
-        self.tbl_address.push(o);
-      });
-    } catch (err) {
-      console.log('error while loading tbl_address:');
-      console.log(err);
-      this.tbl_address = [];
-    }
-    this.redraw_address();
+    this.collection_address.loadFromObject($.localStorage.get('tbl_address'), ObjectAddress);
   }
   if ($.localStorage.isSet('tbl_bs') && !$.localStorage.isEmpty('tbl_bs')) {
     try {
@@ -221,7 +352,7 @@ App.prototype = {
       azm_start = 360 + azm_start;
       azm_end = 360 + azm_end;
     }
-    for (var x = azm_start; x <= azm_end; x++) { 
+    for (var x = azm_start; x <= azm_end; x++) {
       var brng = (x % 360) * Math.PI / 180;
       var destLat = Math.asin(Math.sin(lat)*Math.cos(d) + Math.cos(lat)*Math.sin(d)*Math.cos(brng));
       var destLng = ((lon + Math.atan2(Math.sin(brng)*Math.sin(d)*Math.cos(lat), Math.cos(d)-Math.sin(lat)*Math.sin(destLat))) * 180) / Math.PI;
@@ -437,10 +568,6 @@ App.prototype = {
     };
     var re = new RegExp(Object.keys(tbl).join("|"),"gi");
     return str.replace(re, function(matched){ return tbl[matched]; });
-  },
-  escapeHTML: function(str) {
-    if (typeof str === "string") str.replace(/&/g, '&amp;').replace(/>/g, '&gt;').replace(/</g, '&lt;'); 
-    return str;
   }
 };
 

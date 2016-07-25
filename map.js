@@ -150,7 +150,7 @@ function App(){
   this.layers = {
     'Google': new L.Google('ROADMAP'),
     'Яндекс': new L.Yandex(),
-    'Visicom': new L.TileLayer('http://tms{s}.visicom.ua/2.0.0/planet3/base_ru/{z}/{x}/{y}.png',{
+    'Visicom': new L.TileLayer('//tms{s}.visicom.ua/2.0.0/planet3/base_ru/{z}/{x}/{y}.png',{
       maxZoom: 19,
       tms: true,
       subdomains: '123'

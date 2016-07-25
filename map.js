@@ -9,7 +9,7 @@ function App(){
   this.layers = {
     'Google': new L.Google('ROADMAP'),
     'Яндекс': new L.Yandex(),
-    'Visicom': new L.TileLayer('http://tms{s}.visicom.ua/2.0.0/planet3/base_ru/{z}/{x}/{y}.png',{
+    'Visicom': new L.TileLayer('//tms{s}.visicom.ua/2.0.0/planet3/base_ru/{z}/{x}/{y}.png',{
       maxZoom: 19,
       tms: true,
       subdomains: '123'
@@ -221,7 +221,7 @@ App.prototype = {
       azm_start = 360 + azm_start;
       azm_end = 360 + azm_end;
     }
-    for (var x = azm_start; x <= azm_end; x++) { 
+    for (var x = azm_start; x <= azm_end; x++) {
       var brng = (x % 360) * Math.PI / 180;
       var destLat = Math.asin(Math.sin(lat)*Math.cos(d) + Math.cos(lat)*Math.sin(d)*Math.cos(brng));
       var destLng = ((lon + Math.atan2(Math.sin(brng)*Math.sin(d)*Math.cos(lat), Math.cos(d)-Math.sin(lat)*Math.sin(destLat))) * 180) / Math.PI;
@@ -439,7 +439,7 @@ App.prototype = {
     return str.replace(re, function(matched){ return tbl[matched]; });
   },
   escapeHTML: function(str) {
-    if (typeof str === "string") str.replace(/&/g, '&amp;').replace(/>/g, '&gt;').replace(/</g, '&lt;'); 
+    if (typeof str === "string") str.replace(/&/g, '&amp;').replace(/>/g, '&gt;').replace(/</g, '&lt;');
     return str;
   }
 };

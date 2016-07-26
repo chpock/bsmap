@@ -5,7 +5,7 @@
   font: bold 30px "Helvetica Neue", Arial, Helvetica, sans-serif;
 
   width: 320px;
-  height: 31px; 
+  height: 31px;
   border-radius: 50%;
     -o-border-radius: 50%;
     -ms-border-radius: 50%;
@@ -27,7 +27,7 @@
     -o-border-radius: 50%;
     -ms-border-radius: 50%;
     -webkit-border-radius: 50%;
-    -moz-border-radius: 50%;  
+    -moz-border-radius: 50%;
 }
 
 .cssload-inner.cssload-one {
@@ -40,7 +40,7 @@
     -moz-animation: cssload-rotate-one 1.15s linear infinite;
 /*  border-bottom: 3px solid rgb(0,0,0); */
 /*  border-bottom: 4px solid #ea4335; */
-  border-bottom: 4px solid #4285f4; 
+  border-bottom: 4px solid #4285f4;
 }
 
 .cssload-inner.cssload-two {
@@ -51,7 +51,7 @@
     -ms-animation: cssload-rotate-two 1.15s linear infinite;
     -webkit-animation: cssload-rotate-two 1.15s linear infinite;
     -moz-animation: cssload-rotate-two 1.15s linear infinite;
-  border-bottom: 4px solid #ea4335; 
+  border-bottom: 4px solid #ea4335;
 /*  border-bottom: 4px solid #fbbc05; */
 }
 
@@ -64,7 +64,7 @@
     -webkit-animation: cssload-rotate-three 1.15s linear infinite;
     -moz-animation: cssload-rotate-three 1.15s linear infinite;
 /*  border-bottom: 4px solid #4285f4; */
-  border-bottom: 4px solid #34a853; 
+  border-bottom: 4px solid #34a853;
 }
 
 

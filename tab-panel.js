@@ -9,7 +9,7 @@ L.Control.Panel = L.Control.extend({
   },
 
   onAdd: function () {
-    var line;
+    var line, el, span;
     this.buttons = [];
     this.inputs = [];
     this.current_button = 0;
@@ -22,6 +22,8 @@ L.Control.Panel = L.Control.extend({
     this.buttons[0].innerHTML = 'Поиск адреса';
     this.buttons[1] = L.DomUtil.create('span', 'tab-panel-button', buttonbar);
     this.buttons[1].innerHTML = 'Построить БС';
+    this.buttons[2] = L.DomUtil.create('span', 'tab-panel-button', buttonbar);
+    this.buttons[2].innerHTML = 'Область работы БС';
     L.DomEvent.addListener(this.buttons[0], 'click', function(ev){
       L.DomEvent.stopPropagation(ev);
       this._selectPanel(0);
@@ -31,6 +33,11 @@ L.Control.Panel = L.Control.extend({
       L.DomEvent.stopPropagation(ev);
       this._selectPanel(1);
       $('.leaflet-container').addClass('map-cursor-pointer');
+    }, this);
+    L.DomEvent.addListener(this.buttons[2], 'click', function(ev){
+      L.DomEvent.stopPropagation(ev);
+      this._selectPanel(2);
+      $('.leaflet-container').removeClass('map-cursor-pointer');
     }, this);
 
     this.inputs[0] = L.DomUtil.create('div', 'tab-panel-inputbar-container', container);
@@ -48,15 +55,74 @@ L.Control.Panel = L.Control.extend({
     line = L.DomUtil.create('div', 'tab-panel-inputbar', this.inputs[1]);
     L.DomUtil.create('span', 'tab-panel-label', line).innerHTML = "Азимут:";
     L.DomUtil.create('input', 'tab-panel-input-azimut', line).value = '0';
-    var label = L.DomUtil.create('span', 'tab-panel-label', line);
-    label.style.marginLeft = '10px';
-    label.innerHTML = "Цвет сектора:";
+    el = L.DomUtil.create('span', 'tab-panel-label', line);
+    el.style.marginLeft = '10px';
+    el.innerHTML = "Цвет сектора:";
     this.colorpicker = this.colorPickerSet('#0000ff', this.colorPicker());
     line.appendChild(this.colorpicker);
     L.DomUtil.create('div', 'tab-panel-inputbar-separator', this.inputs[1]);
     line = L.DomUtil.create('div', 'tab-panel-inputbar-help', this.inputs[1]);
     line.innerHTML = 'Для того, что бы <b>построить</b> БС - введите требуемый азимут, выберите цвет и кликните левой клавишей мышки на карте в месте ее расположения. Для <b>перемещения</b> построенной БС - перетащите маркер.';
 
+    this.inputs[2] = L.DomUtil.create('div', 'tab-panel-inputbar-container');
+    line = L.DomUtil.create('div', 'tab-panel-inputbar', this.inputs[2]);
+    L.DomUtil.create('span', 'tab-panel-label', line).innerHTML = "Оператор:";
+
+    span = L.DomUtil.create('span', 'tab-panel-region-btn tab-panel-region-btn-active', line);
+    el = L.DomUtil.create('input', 'tab-panel-region-oper', span);
+    el.type = 'radio';
+    el.name = 'network';
+    el.value = 'ks';
+    el.checked = 1;
+    L.DomUtil.create('img', '', span).src = 'images/kyivstar.png';
+    L.DomEvent.addListener(span, 'click', function(ev){
+      L.DomEvent.stopPropagation(ev);
+      $('span.tab-panel-region-btn').removeClass('tab-panel-region-btn-active');
+      $('span.tab-panel-region-btn').eq(0).addClass('tab-panel-region-btn-active');
+      $('input.tab-panel-region-oper').eq(0).prop("checked", true);
+    }, this);
+
+    span = L.DomUtil.create('span', 'tab-panel-region-btn', line);
+    el = L.DomUtil.create('input', 'tab-panel-region-oper', span);
+    el.type = 'radio';
+    el.name = 'network';
+    el.value = 'mts';
+    L.DomUtil.create('img', '', span).src = 'images/mts.png';
+    L.DomEvent.addListener(span, 'click', function(ev){
+      L.DomEvent.stopPropagation(ev);
+      $('span.tab-panel-region-btn').removeClass('tab-panel-region-btn-active');
+      $('span.tab-panel-region-btn').eq(1).addClass('tab-panel-region-btn-active');
+      $('input.tab-panel-region-oper').eq(1).prop("checked", true);
+    }, this);
+
+    span = L.DomUtil.create('span', 'tab-panel-region-btn', line);
+    el = L.DomUtil.create('input', 'tab-panel-region-oper', span);
+    el.type = 'radio';
+    el.name = 'network';
+    el.value = 'life';
+    L.DomUtil.create('img', '', span).src = 'images/life.png';
+    L.DomEvent.addListener(span, 'click', function(ev){
+      L.DomEvent.stopPropagation(ev);
+      $('span.tab-panel-region-btn').removeClass('tab-panel-region-btn-active');
+      $('span.tab-panel-region-btn').eq(2).addClass('tab-panel-region-btn-active');
+      $('input.tab-panel-region-oper').eq(2).prop("checked", true);
+    }, this);
+
+    el = L.DomUtil.create('span', 'tab-panel-label', line);
+    el.style.marginLeft = '10px';
+    el.innerHTML = "LAC:";
+    L.DomUtil.create('input', 'tab-panel-input-lac', line).value = '0';
+    el = L.DomUtil.create('span', 'tab-panel-label', line);
+    el.style.marginLeft = '5px';
+    el.innerHTML = "CID:";
+    L.DomUtil.create('input', 'tab-panel-input-cid', line).value = '0';
+    el = L.DomUtil.create('span', 'tab-panel-button', line);
+    el.style.marginLeft = '10px';
+    el.innerHTML = 'Начать поиск';
+
+    L.DomUtil.create('div', 'tab-panel-inputbar-separator', this.inputs[2]);
+    line = L.DomUtil.create('div', 'tab-panel-inputbar-help', this.inputs[2]);
+    line.innerHTML = 'No help. В процессе разработки.';
 
     L.DomEvent.disableClickPropagation(container);
 

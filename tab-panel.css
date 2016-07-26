@@ -48,6 +48,7 @@
 .tab-panel-inputbar-separator {
   margin: 5px 0px;
   height: 1px;
+  padding: 0px;
   background-color: #999999;
 }
 .tab-panel-inputbar-help {
@@ -56,9 +57,6 @@
 .tab-panel-inputbar {
   display: flex;
   align-items: center;
-  padding: 0px;
-}
-.tab-panel-inputbar-separator {
   padding: 0px;
 }
 .tab-panel-label {
@@ -90,6 +88,39 @@
   padding-bottom: 3px;
   padding-left: 5px;
   padding-right: 5px;
+}
+.tab-panel-input-lac {
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  border-radius: 7px;
+  width: 50px;
+
+  border: 1px solid #000000;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+.tab-panel-input-cid {
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  border-radius: 7px;
+  width: 50px;
+
+  border: 1px solid #000000;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+span.tab-panel-region-btn {
+  padding: 3px;
+}
+span.tab-panel-region-btn-active {
+  outline: 1px solid #777777;
+}
+input.tab-panel-region-oper {
+  margin: 0px 3px 0px 3px;
 }
 .map-cursor-pointer {
   cursor: default;

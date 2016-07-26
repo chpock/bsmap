@@ -306,11 +306,11 @@ UtilsMapBS.extend(ObjectMapBS, ObjectBS, {
     if (this.animate_sidebar || !this.polygon) return;
     var self = this;
     var animate = function ani(direction) {
-      self.polygon.setStyle({fillOpacity: self.polygon.options.fillOpacity*(1.0+0.1*direction)});
-      direction = self.polygon.options.fillOpacity < 0.27*0.5 ? 1 : self.polygon.options.fillOpacity > 0.27*1.5 ? -1 : direction;
+      self.polygon.setStyle({fillOpacity: self.polygon.options.fillOpacity*(1.0+0.18*direction)});
+      direction = self.polygon.options.fillOpacity < 0.27*0.3 ? 1 : self.polygon.options.fillOpacity > 0.27*1.9 ? -1 : direction;
       self.animate_sidebar = setTimeout(function(){
         ani(direction);
-      }, 50);
+      }, 40);
     };
     animate(1);
   },

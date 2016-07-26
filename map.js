@@ -628,6 +628,36 @@ App.prototype = {
 //      [place.geometry.viewport.getSouthWest().lat(),place.geometry.viewport.getSouthWest().lng()],
 //      [place.geometry.viewport.getNorthEast().lat(),place.geometry.viewport.getNorthEast().lng()]
 //    ]);
+  },
+  lookupRegion: function () {
+    var lac = parseInt($('.tab-panel-input-lac').val(),10);
+    if (isNaN(lac) || lac < 1 || lac > 65535) {
+      noty({
+        text: 'Невозможно найти местоположение БС: некорректное значение LAT. Значение LAT должно быть от 1 до 65535.',
+        type: 'error',
+        timeout: 5000,
+        layout: 'bottom',
+        theme: 'bsmap'
+      });
+      this.panel._lookupRegionStop($('.tab-panel-input-lac')[0]);
+      return;
+    }
+    var cid = parseInt($('.tab-panel-input-cid').val(),10);
+    if (isNaN(cid) || cid < 1 || cid > 65535) {
+      noty({
+        text: 'Невозможно найти местоположение БС: некорректное значение CID. Значение CID должно быть от 1 до 65535.',
+        type: 'error',
+        timeout: 5000,
+        layout: 'bottom',
+        theme: 'bsmap'
+      });
+     this.panel._lookupRegionStop($('.tab-panel-input-cid')[0]);
+     return;
+    }
+    var mcc = 255;
+    var mnc = $('.tab-panel-region-oper:checked').val();
+    console.log('' + mcc + ' ' + mnc + ' ' + lac + ' ' + cid);
+//    this.panel._lookupRegionStop();
   }
 };
 

@@ -72,7 +72,7 @@ L.Control.Panel = L.Control.extend({
     el = L.DomUtil.create('input', 'tab-panel-region-oper', span);
     el.type = 'radio';
     el.name = 'network';
-    el.value = 'ks';
+    el.value = '03';
     el.checked = 1;
     L.DomUtil.create('img', '', span).src = 'images/kyivstar.png';
     L.DomEvent.addListener(span, 'click', function(ev){
@@ -86,7 +86,7 @@ L.Control.Panel = L.Control.extend({
     el = L.DomUtil.create('input', 'tab-panel-region-oper', span);
     el.type = 'radio';
     el.name = 'network';
-    el.value = 'mts';
+    el.value = '01';
     L.DomUtil.create('img', '', span).src = 'images/mts.png';
     L.DomEvent.addListener(span, 'click', function(ev){
       L.DomEvent.stopPropagation(ev);
@@ -99,7 +99,7 @@ L.Control.Panel = L.Control.extend({
     el = L.DomUtil.create('input', 'tab-panel-region-oper', span);
     el.type = 'radio';
     el.name = 'network';
-    el.value = 'life';
+    el.value = '06';
     L.DomUtil.create('img', '', span).src = 'images/life.png';
     L.DomEvent.addListener(span, 'click', function(ev){
       L.DomEvent.stopPropagation(ev);
@@ -116,9 +116,18 @@ L.Control.Panel = L.Control.extend({
     el.style.marginLeft = '5px';
     el.innerHTML = "CID:";
     L.DomUtil.create('input', 'tab-panel-input-cid', line).value = '0';
-    el = L.DomUtil.create('span', 'tab-panel-button', line);
+    el = L.DomUtil.create('span', 'tab-panel-button tab-panel-button-lookup-region', line);
+    el.style.perspective =  '780px';
     el.style.marginLeft = '10px';
     el.innerHTML = 'Начать поиск';
+    L.DomEvent.addListener(el, 'click', function(ev){
+      L.DomEvent.stopPropagation(ev);
+      if (this.inlookupregion) {
+        this._lookupRegionStop()
+      } else {
+        this._lookupRegion();
+      }
+    }, this);
 
     L.DomUtil.create('div', 'tab-panel-inputbar-separator', this.inputs[2]);
     line = L.DomUtil.create('div', 'tab-panel-inputbar-help', this.inputs[2]);
@@ -135,6 +144,33 @@ L.Control.Panel = L.Control.extend({
     L.DomUtil.addClass(this.buttons[bid], 'tab-panel-button-active');
     this._container.appendChild(this.inputs[bid]);
     this.current_button = bid;
+  },
+
+  _lookupRegion: function() {
+    var ani;
+    var el = $('.tab-panel-button-lookup-region')[0];
+    var width = $(el).width();
+    while(el.lastChild) el.removeChild(el.lastChild);
+    el.appendChild(document.createTextNode('Поиск...'));
+    ani = L.DomUtil.create('div', 'cssload-inner cssload-one', el);
+    ani.style.width = '1em';
+    ani.style.right = '10px';
+    ani = L.DomUtil.create('div', 'cssload-inner cssload-two', el);
+    ani.style.width = '1em';
+    ani.style.right = '10px';
+    ani = L.DomUtil.create('div', 'cssload-inner cssload-three', el);
+    ani.style.width = '1em';
+    ani.style.right = '10px';
+    $(el).width(width);
+    this.inlookupregion = true;
+    app.lookupRegion();
+  },
+
+  _lookupRegionStop: function(focus) {
+    delete this.inlookupregion;
+    var el = $('.tab-panel-button-lookup-region')[0];
+    el.innerHTML = 'Начать поиск';
+    if (focus) focus.focus();
   },
 
   colorPicker: function(callback) {

@@ -486,10 +486,19 @@ function App(){
     } catch (err) {
       console.log('error while setting map view:');
       console.log(err);
+      center = null;
+      zoom = null;
     }
   }
 
-  center = center || new L.LatLng(48.502275,34.62719);
+  if (!center) {
+    $.getJSON("http://ip-api.com/json/?callback=?", (function(self){
+      return function(data) {
+        if (data && data.lat && data.lon && self.map) self.map.flyTo([data.lat, data.lon]);
+      };
+    })(this));
+    center = new L.LatLng(50.4501, 30.5234);
+  }
   zoom = zoom || 11;
 
   this.map = new L.Map('map', {

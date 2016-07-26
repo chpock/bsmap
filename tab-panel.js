@@ -42,7 +42,7 @@ L.Control.Panel = L.Control.extend({
     }, this);
     L.DomUtil.create('div', 'tab-panel-inputbar-separator', this.inputs[0]);
     line = L.DomUtil.create('div', 'tab-panel-inputbar-help', this.inputs[0]);
-    line.innerHTML = 'Для того, что бы построить <b>адрес</b> - начинайте вводить адрес в строку ввода и выберите подходящий из выпадающего списка подсказок.';
+    line.innerHTML = 'Для того, что бы <b>построить</b> адрес - начинайте вводить адрес в строку ввода и выберите подходящий из выпадающего списка подсказок.';
 
     this.inputs[1] = L.DomUtil.create('div', 'tab-panel-inputbar-container');
     line = L.DomUtil.create('div', 'tab-panel-inputbar', this.inputs[1]);
@@ -55,7 +55,7 @@ L.Control.Panel = L.Control.extend({
     line.appendChild(this.colorpicker);
     L.DomUtil.create('div', 'tab-panel-inputbar-separator', this.inputs[1]);
     line = L.DomUtil.create('div', 'tab-panel-inputbar-help', this.inputs[1]);
-    line.innerHTML = 'Для того, что бы построить <b>БС</b> - введите требуемый азимут, выберите цвет и кликните левой клавишей мышки на карте.';
+    line.innerHTML = 'Для того, что бы <b>построить</b> БС - введите требуемый азимут, выберите цвет и кликните левой клавишей мышки на карте в месте ее расположения. Для <b>перемещения</b> построенной БС - перетащите маркер.';
 
 
     L.DomEvent.disableClickPropagation(container);

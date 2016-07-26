@@ -9,6 +9,7 @@ L.Control.Panel = L.Control.extend({
   },
 
   onAdd: function () {
+    var line;
     this.buttons = [];
     this.inputs = [];
     this.current_button = 0;
@@ -21,32 +22,41 @@ L.Control.Panel = L.Control.extend({
     this.buttons[0].innerHTML = 'Поиск адреса';
     this.buttons[1] = L.DomUtil.create('span', 'tab-panel-button', buttonbar);
     this.buttons[1].innerHTML = 'Построить БС';
-    L.DomEvent.addListener(this.buttons[0], 'click', function(ev){ 
+    L.DomEvent.addListener(this.buttons[0], 'click', function(ev){
       L.DomEvent.stopPropagation(ev);
       this._selectPanel(0);
       $('.leaflet-container').removeClass('map-cursor-pointer');
     }, this);
-    L.DomEvent.addListener(this.buttons[1], 'click', function(ev){ 
+    L.DomEvent.addListener(this.buttons[1], 'click', function(ev){
       L.DomEvent.stopPropagation(ev);
       this._selectPanel(1);
       $('.leaflet-container').addClass('map-cursor-pointer');
     }, this);
 
-    this.inputs[0] = L.DomUtil.create('div', 'tab-panel-inputbar', container);
-    L.DomUtil.create('span', 'tab-panel-label', this.inputs[0]).innerHTML = "Адрес:";
-    this.input_address = L.DomUtil.create('input', 'tab-panel-input-address', this.inputs[0]);
+    this.inputs[0] = L.DomUtil.create('div', 'tab-panel-inputbar-container', container);
+    line = L.DomUtil.create('div', 'tab-panel-inputbar', this.inputs[0]);
+    L.DomUtil.create('span', 'tab-panel-label', line).innerHTML = "Адрес:";
+    this.input_address = L.DomUtil.create('input', 'tab-panel-input-address', line);
     L.DomEvent.addListener(this.input_address, 'keydown', function(ev){
       L.DomUtil.removeClass(ev.currentTarget, 'address-notfound');
     }, this);
+    L.DomUtil.create('div', 'tab-panel-inputbar-separator', this.inputs[0]);
+    line = L.DomUtil.create('div', 'tab-panel-inputbar-help', this.inputs[0]);
+    line.innerHTML = 'Для того, что бы построить <b>адрес</b> - начинайте вводить адрес в строку ввода и выберите подходящий из выпадающего списка подсказок.';
 
-    this.inputs[1] = L.DomUtil.create('div', 'tab-panel-inputbar');
-    L.DomUtil.create('span', 'tab-panel-label', this.inputs[1]).innerHTML = "Азимут:";
-    L.DomUtil.create('input', 'tab-panel-input-azimut', this.inputs[1]).value = '0';
-    var label = L.DomUtil.create('span', 'tab-panel-label', this.inputs[1]);
+    this.inputs[1] = L.DomUtil.create('div', 'tab-panel-inputbar-container');
+    line = L.DomUtil.create('div', 'tab-panel-inputbar', this.inputs[1]);
+    L.DomUtil.create('span', 'tab-panel-label', line).innerHTML = "Азимут:";
+    L.DomUtil.create('input', 'tab-panel-input-azimut', line).value = '0';
+    var label = L.DomUtil.create('span', 'tab-panel-label', line);
     label.style.marginLeft = '10px';
     label.innerHTML = "Цвет сектора:";
     this.colorpicker = this.colorPickerSet('#0000ff', this.colorPicker());
-    this.inputs[1].appendChild(this.colorpicker);
+    line.appendChild(this.colorpicker);
+    L.DomUtil.create('div', 'tab-panel-inputbar-separator', this.inputs[1]);
+    line = L.DomUtil.create('div', 'tab-panel-inputbar-help', this.inputs[1]);
+    line.innerHTML = 'Для того, что бы построить <b>БС</b> - введите требуемый азимут, выберите цвет и кликните левой клавишей мышки на карте.';
+
 
     L.DomEvent.disableClickPropagation(container);
 

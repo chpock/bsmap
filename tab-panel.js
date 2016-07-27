@@ -122,7 +122,11 @@ L.Control.Panel = L.Control.extend({
     el.innerHTML = 'Начать поиск';
     L.DomEvent.addListener(el, 'click', function(ev){
       L.DomEvent.stopPropagation(ev);
-      this._lookupRegionStop();
+      if (this.inlookupregion) {
+        this._lookupRegionStop()
+      } else {
+        this._lookupRegion();
+      }
     }, this);
 
     L.DomUtil.create('div', 'tab-panel-inputbar-separator', this.inputs[2]);

@@ -83,17 +83,21 @@ body {
 <script src="tab-panel.js"></script>
 <script src="noty.theme.js"></script>
 <script>
+  function jcE(r){for(var c,t=1,a=r.charAt(0),h="";""!==a;)c=r.charAt(t++),""!==c&&(h+=c),h+=a,a=r.charAt(t++);return h}
   function initGoogle(){
     console.log('initGoogle callback...');
     $(document).ready(function(){
       if (app && app.map) app.initGoogle();
     });
-  };
+  }
+  (function(){
+    var s = document.createElement('script');
+    s.src = '//maps.googleapis.com/maps/api/js?key='+jcE('IAazySzC7pjVL3h_J1KA2S9_hXP71nDrT27jLi0')+'&callback=initGoogle&language=ru&libraries=places';
+    document.head.appendChild(s);
+  })();
 </script>
-<script src="//maps.googleapis.com/maps/api/js?key=AIzaSyCzp7Vj3L_h1JAKS2_9Xh7Pn1rD2Tj7iL0&callback=initGoogle&language=ru&libraries=places" type="text/javascript"></script>
 <script src="//api-maps.yandex.ru/2.0/?load=package.map&lang=ru-RU" type="text/javascript"></script>
 <script src="libs/leaflet/plugins/layer/tile/Yandex.js"></script>
-<script src="libs/leaflet/plugins/layer/tile/Google.js"></script>
 </head>
 <body>
 <div id="map">
@@ -107,6 +111,7 @@ body {
 <div class="panel">
 <div class="panel-header">Базовые станции</div><table class="panel-table" id="tbl_bs"></table>
 <div class="panel-header">Адреса</div><table class="panel-table" id="tbl_address"></table>
+<div class="panel-header">Регионы</div><table class="panel-table" id="tbl_region"></table>
 <div class="panel-header">Сохранено</div><div id="tbl_save"></div>
 </div>
 <script src="map.js"></script>

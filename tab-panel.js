@@ -72,9 +72,9 @@ L.Control.Panel = L.Control.extend({
     el = L.DomUtil.create('input', 'tab-panel-region-oper', span);
     el.type = 'radio';
     el.name = 'network';
-    el.value = '03';
+    el.value = '3';
     el.checked = 1;
-    L.DomUtil.create('img', '', span).src = 'images/kyivstar.png';
+    L.DomUtil.create('img', '', span).src = 'images/255-3.png';
     L.DomEvent.addListener(span, 'click', function(ev){
       L.DomEvent.stopPropagation(ev);
       $('span.tab-panel-region-btn').removeClass('tab-panel-region-btn-active');
@@ -86,8 +86,8 @@ L.Control.Panel = L.Control.extend({
     el = L.DomUtil.create('input', 'tab-panel-region-oper', span);
     el.type = 'radio';
     el.name = 'network';
-    el.value = '01';
-    L.DomUtil.create('img', '', span).src = 'images/mts.png';
+    el.value = '1';
+    L.DomUtil.create('img', '', span).src = 'images/255-1.png';
     L.DomEvent.addListener(span, 'click', function(ev){
       L.DomEvent.stopPropagation(ev);
       $('span.tab-panel-region-btn').removeClass('tab-panel-region-btn-active');
@@ -99,8 +99,8 @@ L.Control.Panel = L.Control.extend({
     el = L.DomUtil.create('input', 'tab-panel-region-oper', span);
     el.type = 'radio';
     el.name = 'network';
-    el.value = '06';
-    L.DomUtil.create('img', '', span).src = 'images/life.png';
+    el.value = '6';
+    L.DomUtil.create('img', '', span).src = 'images/255-6.png';
     L.DomEvent.addListener(span, 'click', function(ev){
       L.DomEvent.stopPropagation(ev);
       $('span.tab-panel-region-btn').removeClass('tab-panel-region-btn-active');
@@ -111,11 +111,11 @@ L.Control.Panel = L.Control.extend({
     el = L.DomUtil.create('span', 'tab-panel-label', line);
     el.style.marginLeft = '10px';
     el.innerHTML = "LAC:";
-    L.DomUtil.create('input', 'tab-panel-input-lac', line).value = '0';
+    L.DomUtil.create('input', 'tab-panel-input-lac', line).value = '48126';
     el = L.DomUtil.create('span', 'tab-panel-label', line);
     el.style.marginLeft = '5px';
     el.innerHTML = "CID:";
-    L.DomUtil.create('input', 'tab-panel-input-cid', line).value = '0';
+    L.DomUtil.create('input', 'tab-panel-input-cid', line).value = '14075';
     el = L.DomUtil.create('span', 'tab-panel-button tab-panel-button-lookup-region', line);
     el.style.perspective =  '780px';
     el.style.marginLeft = '10px';

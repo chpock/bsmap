@@ -9,6 +9,7 @@
 /*global $ */
 /*global google */
 /*global noty */
+/*global jcE */
 "use strict";
 
 var UtilsMapBS = {
@@ -326,6 +327,112 @@ UtilsMapBS.extend(ObjectMapBS, ObjectBS, {
 
 });
 
+function ObjectRegion(options) {
+  ObjectMapBS.call(this, {
+    lac: 0,
+    cid: 0,
+    mnc: 0,
+    mcc: 0,
+    location_g: null,
+    location_y: null,
+    location_m: null
+  }, options);
+}
+UtilsMapBS.extend(ObjectMapBS, ObjectRegion, {
+  addToMap: function() {
+    var icon;
+    if(this.map()) {
+      var locs = [
+        {
+          location: this.options.location_g,
+          icon_src: 'marker-icon-google',
+          marker_var: 'marker_g'
+        },{
+          location: this.options.location_y,
+          icon_src: 'marker-icon-yandex',
+          marker_var: 'marker_y'
+        },{
+          location: this.options.location_m,
+          icon_src: 'marker-icon-mozilla',
+          marker_var: 'marker_m'
+        }
+      ];
+      var func_mouseover = function(){
+        L.DomUtil.addClass($('#tbl_region .panel-item')[this.collection.indexOf(this)], 'panel-item-active');
+      };
+      var func_mouseout = function(){
+        $('#tbl_region .panel-item-active').each(function(){
+          L.DomUtil.removeClass($(this)[0], 'panel-item-active');
+        });
+      };
+      for (var i = 0; i < locs.length; i++) {
+        if (!locs[i].location) continue;
+//            iconRetinaUrl: 'my-icon@2x.png',
+//            shadowRetinaUrl: 'my-icon-shadow@2x.png',
+        icon = L.icon({
+            iconUrl: 'images/' + locs[i].icon_src + '.png',
+            shadowUrl: 'images/marker-shadow.png',
+            iconSize:    [25, 41],
+            iconAnchor:  [12, 41],
+            popupAnchor: [1, -34],
+            tooltipAnchor: [16, -28],
+            shadowSize:  [41, 41]
+        });
+        this[locs[i].marker_var] = L.marker(locs[i].location, {
+          clickable: true,
+          keyboard: false,
+          title: '',
+          icon: icon
+        }).addTo(this.map());
+        this[locs[i].marker_var].on('mouseover', func_mouseover, this);
+        this[locs[i].marker_var].on('mouseout', func_mouseout, this);
+      }
+    }
+    return this;
+  },
+
+  removeFromMap: function () {
+    if (this.marker_g) this.map().removeLayer(this.marker_g);
+    if (this.marker_y) this.map().removeLayer(this.marker_y);
+    if (this.marker_m) this.map().removeLayer(this.marker_m);
+    return this;
+  },
+
+  getPanelElement: function (parent) {
+    var el, img;
+    el = L.DomUtil.create('td', 'panel-column', parent);
+    el.style.width = '12px';
+    el.style.paddingRight = '5px';
+    img = L.DomUtil.create('img', '', el);
+    img.src = 'images/' + this.options.mcc + '-' + this.options.mnc + '.png';
+    img.style.width = '12px';
+    img.style.height = '12px';
+    el = L.DomUtil.create('td', 'panel-column', parent);
+    el.innerHTML = 'Lac: ' + UtilsMapBS.escapeHTML(this.options.lac) + ' / Cellid: ' + UtilsMapBS.escapeHTML(this.options.cid);
+    return el;
+  },
+
+  setLocation: function (key, val) {
+    this.removeFromMap();
+    this.options[key] = val;
+    this.addToMap();
+    this.redrawSidebar();
+  },
+
+  onClickSidebar: function() {
+    if (this.map()) {
+      if (this.options.location_g) {
+        this.map().panTo(this.options.location_g);
+      } else if (this.options.location_y) {
+        this.map().panTo(this.options.location_y);
+      } else if (this.options.location_m) {
+        this.map().panTo(this.options.location_m);
+      }
+    }
+  }
+
+});
+
 function ObjectAddress(options){
   ObjectMapBS.call(this, {
     location: null,
@@ -389,7 +496,7 @@ ObjectBSMapCollection.prototype = {
     return this.objects[i];
   },
   new: function (opts, lockredraw) {
-    this.push(new this.options.objects(opts), lockredraw);
+    return this.push(new this.options.objects(opts), lockredraw);
   },
   push: function (item, lockredraw) {
     item.removeFromMap();
@@ -397,14 +504,14 @@ ObjectBSMapCollection.prototype = {
     item.collection = this;
     item.addToMap();
     if (!lockredraw) this.redrawSidebar();
-    return this;
+    return item;
   },
   delete: function (item, lockredraw) {
     item.removeFromMap();
     delete item.collection;
     this.objects.splice(this.indexOf(item),1);
     if (!lockredraw) this.redrawSidebar();
-    return this;
+    return item;
   },
   indexOf: function (item) {
     for (var i = this.objects.length - 1; i >= 0; i--)
@@ -470,7 +577,6 @@ function App(){
   $('#map')[0].style['background-image'] = 'url(images/background.png)';
 
   this.layers = {
-    'Google': new L.Google('ROADMAP'),
     'Яндекс': new L.Yandex(),
     'Visicom': new L.TileLayer('//tms{s}.visicom.ua/2.0.0/planet3/base_ru/{z}/{x}/{y}.png',{
       maxZoom: 19,
@@ -501,6 +607,7 @@ function App(){
   }
   zoom = zoom || 11;
 
+
   this.map = new L.Map('map', {
     center: center,
     zoom: zoom,
@@ -519,8 +626,10 @@ function App(){
       dblclick: UtilsMapBS.cancelExecutionFunc('buildbs')
     }, this)
     .addLayer(this.layers['Visicom'])
-    .addControl(new L.Control.Layers(this.layers))
     .addControl(new L.Control.Zoom({ position: "bottomleft" }));
+
+  this.map_control_layers = new L.Control.Layers(this.layers);
+  this.map.addControl(this.map_control_layers);
 
   this.panel = new L.Control.Panel();
   this.map.addControl(this.panel);
@@ -531,12 +640,17 @@ function App(){
     save_id: 'tbl_address',
     objects: ObjectAddress
   }).loadFromStorage();
-
   this.collection_bs = new ObjectBSMapCollection({
     map: this.map,
     sidebar: $('#tbl_bs')[0],
     save_id: 'tbl_bs',
     objects: ObjectBS
+  }).loadFromStorage();
+  this.collection_region = new ObjectBSMapCollection({
+    map: this.map,
+    sidebar: $('#tbl_region')[0],
+    save_id: 'tbl_region',
+    objects: ObjectRegion
   }).loadFromStorage();
 }
 
@@ -553,6 +667,10 @@ App.prototype = {
     this.autocompleteBound();
 
     UtilsMapBS.geocoder = new google.maps.Geocoder();
+
+    $.getScript("libs/leaflet/plugins/layer/tile/Google.js", function(){
+      self.map_control_layers.addBaseLayer(new L.Google('ROADMAP'), 'Google');
+    });
   },
   autocompleteBound: function(){
     if (this.map) {
@@ -655,9 +773,97 @@ App.prototype = {
      return;
     }
     var mcc = 255;
-    var mnc = $('.tab-panel-region-oper:checked').val();
-    console.log('' + mcc + ' ' + mnc + ' ' + lac + ' ' + cid);
-//    this.panel._lookupRegionStop();
+    var mnc = parseInt($('.tab-panel-region-oper:checked').val(),10);
+    var req = {
+      done_g: false,
+      done_y: true,
+      done_m: true
+    };
+    var onComplete = function() {
+      if (!req.obj) {
+        if (req.g || req.y || req.m) {
+          req.obj = this.collection_region.new({
+            lac: lac,
+            cid: cid,
+            mnc: mnc,
+            mcc: mcc,
+            location_g: req.g,
+            location_y: req.y,
+            location_m: req.m
+          });
+        }
+      } else {
+        if (req.g) req.obj.setLocation('location_g', req.g);
+        if (req.y) req.obj.setLocation('location_y', req.y);
+        if (req.m) req.obj.setLocation('location_m', req.m);
+      }
+      delete req.g;
+      delete req.y;
+      delete req.m;
+      if (req.done_g && req.done_y && req.done_m) this.panel._lookupRegionStop();
+    };
+    var onError = function(source, jqXHR, status, error, custommsg) {
+      var msg;
+      console.log('on error...');
+      console.log(source);
+      console.log(jqXHR);
+      console.log(status);
+      console.log(error);
+      msg = 'Ошибка получения данных от источника "' + source + '" про работу БС с LAC: ' + lac + ' / Cellid: ' + cid +' оператора "' + mnc + '".';
+      if (jqXHR && jqXHR.status !== 0) {
+        msg += ' Статус ответа: "' + jqXHR.status + '".';
+      }
+      if (custommsg) {
+        msg += ' ' + custommsg + '.';
+      }
+      noty({
+        text: msg,
+        type: 'error',
+        timeout: 50000,
+        layout: 'bottom',
+        theme: 'bsmap'
+      });
+    };
+    $.ajax({
+      data: JSON.stringify({
+        radioType: "gsm",
+        homeMobileCountryCode: mcc,
+        homeMobileNetworkCode: mnc,
+        considerIp: false,
+        cellTowers: [{
+          cellId: cid,
+          locationAreaCode: lac,
+          mobileCountryCode: mcc,
+          mobileNetworkCode: mnc,
+          age: 0,
+          signalStrength: -65
+        }]
+      }),
+      url: "https://www.googleapis.com/geolocation/v1/geolocate?key="+jcE("IAazySyCiHFmOc10DC7SCKfNeOyTLrQT7V8M02Q"),
+      type: "POST",
+      contentType: "application/json; charset=utf-8",
+      dataType: 'json',
+      context: this,
+      cache: false,
+      success: function(response, status){
+        if (status !== 'success') {
+          onError.call(this, "Google", null, null, null, 'Статус запроса: "' + status + '"');
+          console.log(response);console.log(status);
+        } else if (!response || !response.location || !response.location.lat || !response.location.lng) {
+          onError.call(this, "Google", null, null, null, 'Не найдена информация про lat/lng в ответе');
+          console.log(response);console.log(status);
+        } else {
+          req.g = L.latLng([response.location.lat,response.location.lng]);
+        }
+      },
+      error: function(jqXHR, status, error){
+        onError.call(this, "Google", jqXHR, status, error);
+      },
+      complete: function(){
+        req.done_g = true;
+        onComplete.call(this);
+      }
+    });
   }
 };
 

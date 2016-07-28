@@ -118,7 +118,8 @@ L.Control.Panel = L.Control.extend({
     L.DomUtil.create('input', 'tab-panel-input-cid', line).value = '0';
     el = L.DomUtil.create('span', 'tab-panel-button tab-panel-button-lookup-region', line);
     el.style.perspective =  '780px';
-    el.style.marginLeft = '10px';
+    el.style.margin = '0px 0px 0px 10px';
+    el.style.fontSize = '11px';
     el.innerHTML = 'Начать поиск';
     L.DomEvent.addListener(el, 'click', function(ev){
       L.DomEvent.stopPropagation(ev);

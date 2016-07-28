@@ -301,7 +301,7 @@ UtilsMapBS.extend(ObjectMapBS, ObjectBS, {
   },
 
   onClickSidebar: function() {
-    if (this.map() && this.options.location) this.map().panTo(this.options.location);
+    if (this.map() && this.options.location) this.map().flyTo(this.options.location);
   },
   onMouseOverSidebar: function() {
     if (this.animate_sidebar || !this.polygon) return;
@@ -409,6 +409,18 @@ UtilsMapBS.extend(ObjectMapBS, ObjectRegion, {
     img.style.height = '12px';
     el = L.DomUtil.create('td', 'panel-column', parent);
     el.innerHTML = 'Lac: ' + UtilsMapBS.escapeHTML(this.options.lac) + ' / Cellid: ' + UtilsMapBS.escapeHTML(this.options.cid);
+    el = L.DomUtil.create('td', '', parent);
+    el.style.width = '12px';
+    el = L.DomUtil.create('div', 'panel-region-source ' + (this.options.location_g ? 'panel-region-source-ok' : 'panel-region-source-error'), el)
+    el.innerHTML = 'G';
+    el = L.DomUtil.create('td', '', parent);
+    el.style.width = '12px';
+    el = L.DomUtil.create('div', 'panel-region-source ' + (this.options.location_y ? 'panel-region-source-ok' : 'panel-region-source-error'), el)
+    el.innerHTML = 'Y';
+    el = L.DomUtil.create('td', '', parent);
+    el.style.width = '12px';
+    el = L.DomUtil.create('div', 'panel-region-source ' + (this.options.location_m ? 'panel-region-source-ok' : 'panel-region-source-error'), el)
+    el.innerHTML = 'M';
     return el;
   },
 
@@ -422,11 +434,11 @@ UtilsMapBS.extend(ObjectMapBS, ObjectRegion, {
   onClickSidebar: function() {
     if (this.map()) {
       if (this.options.location_g) {
-        this.map().panTo(this.options.location_g);
+        this.map().flyTo(this.options.location_g);
       } else if (this.options.location_y) {
-        this.map().panTo(this.options.location_y);
+        this.map().flyTo(this.options.location_y);
       } else if (this.options.location_m) {
-        this.map().panTo(this.options.location_m);
+        this.map().flyTo(this.options.location_m);
       }
     }
   }
@@ -473,7 +485,7 @@ UtilsMapBS.extend(ObjectMapBS, ObjectAddress, {
   },
 
   onClickSidebar: function() {
-    if (this.map() && this.options.location) this.map().panTo(this.options.location);
+    if (this.map() && this.options.location) this.map().flyTo(this.options.location);
   }
 
 });
@@ -792,6 +804,7 @@ App.prototype = {
             location_y: req.y,
             location_m: req.m
           });
+          req.obj.onClickSidebar();
         }
       } else {
         if (req.g) req.obj.setLocation('location_g', req.g);
@@ -825,7 +838,7 @@ App.prototype = {
         theme: 'bsmap'
       });
     };
-/*    $.ajax({
+    $.ajax({
       data: JSON.stringify({
         radioType: "gsm",
         homeMobileCountryCode: mcc,
@@ -864,9 +877,8 @@ App.prototype = {
         req.done_g = true;
         onComplete.call(this);
       }
-    }); */
-//      jsonp: "callback",
-    $.ajax({
+    });
+/*    $.ajax({
       data: "json="+JSON.stringify({
         common: {
           version: "1.0",
@@ -883,7 +895,8 @@ App.prototype = {
       }),
       url: "http://api.lbs.yandex.net/geolocation",
       type: "POST",
-      dataType: 'jsonp',
+      contentType: "application/x-www-form-urlencoded; charset=utf-8",
+      dataType: 'json',
       context: this,
       cache: false,
       success: function(response, status){
@@ -904,7 +917,35 @@ App.prototype = {
         req.done_y = true;
         onComplete.call(this);
       }
+    }); */
+    $.ajax({
+      data: 'cellid=' + cid + "&lac=" + lac + "&countrycode=" + mcc + "&operatorid=" + mnc,
+      url: "https://crossorigin.me/http://mobile.maps.yandex.net/cellid_location",
+      type: "GET",
+      context: this,
+      dataType: 'xml',
+      cache: false,
+      success: function(response, status){
+        var coord = $(response).find('location[source="FoundByCellid"]:eq(0) coordinates');
+        if (status !== 'success') {
+          onError.call(this, "Yandex", null, null, null, 'Статус запроса: "' + status + '"');
+          console.log(response);console.log(status);
+        } else if (!coord.length || !coord.attr('latitude') || !coord.attr('longitude')) {
+          onError.call(this, "Yandex", null, null, null, 'Не найдена информация про lat/lng в ответе');
+          console.log(response);console.log(status);
+        } else {
+          req.y = L.latLng([coord.attr('latitude'),coord.attr('longitude')]);
+        }
+      },
+      error: function(jqXHR, status, error){
+        onError.call(this, "Yandex", jqXHR, status, error);
+      },
+      complete: function(){
+        req.done_y = true;
+        onComplete.call(this);
+      }
     });
+
   }
 };
 

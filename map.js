@@ -775,11 +775,12 @@ App.prototype = {
     var mcc = 255;
     var mnc = parseInt($('.tab-panel-region-oper:checked').val(),10);
     var req = {
-      done_g: false,
-      done_y: true,
+      done_g: true,
+      done_y: false,
       done_m: true
     };
     var onComplete = function() {
+      console.log('on complite');
       if (!req.obj) {
         if (req.g || req.y || req.m) {
           req.obj = this.collection_region.new({
@@ -824,7 +825,7 @@ App.prototype = {
         theme: 'bsmap'
       });
     };
-    $.ajax({
+/*    $.ajax({
       data: JSON.stringify({
         radioType: "gsm",
         homeMobileCountryCode: mcc,
@@ -861,6 +862,46 @@ App.prototype = {
       },
       complete: function(){
         req.done_g = true;
+        onComplete.call(this);
+      }
+    }); */
+//      jsonp: "callback",
+    $.ajax({
+      data: "json="+JSON.stringify({
+        common: {
+          version: "1.0",
+          api_key: jcE('DAEMVmBcAAAAg5yiAYAM-bYmfr0MYQQCVOT2QHBluxl1A2AUAAAAAAAAAAGA0cPJAoaXa8WPBhb13MV-pRM8ww==')
+        },
+        gsm_cells: [{
+          countrycode: mcc,
+          operatorid: mnc,
+          cellid: cid,
+          lac: lac,
+          signal_strength: -65,
+          age: 0
+        }]
+      }),
+      url: "http://api.lbs.yandex.net/geolocation",
+      type: "POST",
+      dataType: 'jsonp',
+      context: this,
+      cache: false,
+      success: function(response, status){
+        if (status !== 'success') {
+          onError.call(this, "Yandex", null, null, null, 'Статус запроса: "' + status + '"');
+          console.log(response);console.log(status);
+        } else if (!response || !response.location || !response.location.lat || !response.location.lng) {
+          onError.call(this, "Yandex", null, null, null, 'Не найдена информация про lat/lng в ответе');
+          console.log(response);console.log(status);
+        } else {
+          req.y = L.latLng([response.location.lat,response.location.lng]);
+        }
+      },
+      error: function(jqXHR, status, error){
+        onError.call(this, "Yandex", jqXHR, status, error);
+      },
+      complete: function(){
+        req.done_y = true;
         onComplete.call(this);
       }
     });

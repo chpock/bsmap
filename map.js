@@ -105,8 +105,6 @@ ObjectMapBS.prototype = {
       for (var k in this.options) {
         if (obj.hasOwnProperty(k)) {
           this.options[k] = obj[k];
-        } else {
-          this.options[k] = null;
         }
       }
     }
@@ -188,7 +186,7 @@ UtilsMapBS.extend(ObjectMapBS, ObjectBS, {
       points.push(this.options.location);
       var lat = (this.options.location.lat * Math.PI) / 180;
       var lon = (this.options.location.lng * Math.PI) / 180;
-      var d = parseFloat(this.options.size) / 6378100;
+      var d = (parseFloat(this.options.size) || 50.0) / 6378100;
       var azm_start = this.options.azimut - 60;
       var azm_end = this.options.azimut + 60;
       if (azm_start < 0) {
@@ -329,6 +327,7 @@ UtilsMapBS.extend(ObjectMapBS, ObjectBS, {
 
 function ObjectRegion(options) {
   ObjectMapBS.call(this, {
+    size: 500,
     lac: 0,
     cid: 0,
     mnc: 0,
@@ -387,6 +386,103 @@ UtilsMapBS.extend(ObjectMapBS, ObjectRegion, {
         this[locs[i].marker_var].on('mouseover', func_mouseover, this);
         this[locs[i].marker_var].on('mouseout', func_mouseout, this);
       }
+      this.addToMapPolygon();
+    }
+    return this;
+  },
+
+  addToMapPolygon: function () {
+    var polys = [];
+    var drawCircle = function (point) {
+      if (!point) return [];
+      var d2r = Math.PI / 180;
+      var r2d = 180 / Math.PI;
+      var earthsradius = 3963;
+      var points = 32;
+      var rlat = ((parseFloat(this.options.size) || 50.0) / 6378100) * r2d;
+      var rlng = rlat / Math.cos(point.lat * d2r);
+      var extp = [];
+      var start = 0, end = points + 1, ex, ey, theta;
+      for (var i=start; i < end; i += 1) {
+        theta = Math.PI * (i / (points/2));
+        ey = point.lng + (rlng * Math.cos(theta)); // center a + radius x * cos(theta)
+        ex = point.lat + (rlat * Math.sin(theta)); // center b + radius y * sin(theta)
+        extp.push(new L.LatLng(ex, ey));
+      }
+      return extp;
+    };
+    var sortPoints = function(points) {
+      if (!points.length) return [];
+      var dest = [points[0]];
+      points.splice(0,1);
+      var distance;
+      var current = 0;
+      var min_distance, min_index;
+      while(points.length) {
+        min_distance = null;
+        for (var i = points.length - 1; i >= 0; i--) {
+          distance = Math.sqrt(Math.pow(Math.abs(points[i].lat - dest[current].lat),2) + Math.pow(Math.abs(points[i].lng - dest[current].lng),2));
+          if (!min_distance || distance < min_distance) {
+            min_distance = distance;
+            min_index = i;
+          }
+        }
+        dest.push(points[min_index]);
+        points.splice(min_index, 1);
+        current++;
+      }
+      return dest;
+    };
+    var concatPolygons = function(base, add) {
+      var i, j = base.length - 1, test, r = [], p;
+      for (p = add.length - 1; p >= 0; p--) {
+        test = false;
+        for (i = 0; i < base.length; i++) {
+          if (base[i].lng < add[p].lng && base[j].lng >= add[p].lng || base[j].lng < add[p].lng && base[i].lng >= add[p].lng)
+            if (base[i].lat + (add[p].lng - base[i].lng)/(base[j].lng-base[i].lng)*(base[j].lat-base[i].lat) < add[p].lat)
+              test = !test;
+          j = i;
+        }
+        if (!test) r.push(add[p]);
+      }
+      if ((r.length !== add.length) || !add.length) {
+        j = add.length - 1;
+        for (p = base.length - 1; p >= 0; p--) {
+          test = false;
+          for (i = 0; i < add.length; i++) {
+            if (add[i].lng < base[p].lng && add[j].lng >= base[p].lng || add[j].lng < base[p].lng && add[i].lng >= base[p].lng)
+              if (add[i].lat + (base[p].lng - add[i].lng)/(add[j].lng-add[i].lng)*(add[j].lat-add[i].lat) < base[p].lat)
+                test = !test;
+            j = i;
+          }
+          if (!test) r.push(base[p]);
+        }
+        return sortPoints(r);
+      }
+      return r;
+    };
+    var appendPolygon = function(location) {
+      var points = drawCircle.call(this, location);
+    };
+    if(this.map()) {
+      var points = [];
+      points = concatPolygons(points,drawCircle.call(this, this.options.location_g));
+      console.log(points.length);
+      points = concatPolygons(points,drawCircle.call(this, this.options.location_y));
+      console.log(points.length);
+      points = concatPolygons(points,drawCircle.call(this, this.options.location_m));
+      console.log(points.length);
+      if (points.length) {
+        this.polygon = L.polygon(points, {
+          stroke: true,
+          weight: 1,
+          color: '#00dd00',
+          opacity: 0.7,
+          fillColor: '#00dd00',
+          fillOpacity: 0.27,
+          clickable: true
+        }).addTo(this.map());
+      }
     }
     return this;
   },
@@ -395,11 +491,24 @@ UtilsMapBS.extend(ObjectMapBS, ObjectRegion, {
     if (this.marker_g) this.map().removeLayer(this.marker_g);
     if (this.marker_y) this.map().removeLayer(this.marker_y);
     if (this.marker_m) this.map().removeLayer(this.marker_m);
+    this.removeFromMapPolygon();
+    return this;
+  },
+
+  removeFromMapPolygon: function () {
+    if (this.polygon) this.map().removeLayer(this.polygon);
     return this;
   },
 
   getPanelElement: function (parent) {
     var el, img;
+    el = L.DomUtil.create('td','panel-column', parent);
+    el.style.width = '17px';
+    var dec = L.DomUtil.create('img', 'panel-item-close', el);
+    dec.src = 'images/left.png';
+    dec.style.padding = '0px 1px 0px 0px';
+    var inc = L.DomUtil.create('img', 'panel-item-close', el);
+    inc.src = 'images/right.png';
     el = L.DomUtil.create('td', 'panel-column', parent);
     el.style.width = '12px';
     el.style.paddingRight = '5px';
@@ -411,16 +520,34 @@ UtilsMapBS.extend(ObjectMapBS, ObjectRegion, {
     el.innerHTML = 'Lac: ' + UtilsMapBS.escapeHTML(this.options.lac) + ' / Cellid: ' + UtilsMapBS.escapeHTML(this.options.cid);
     el = L.DomUtil.create('td', '', parent);
     el.style.width = '12px';
-    el = L.DomUtil.create('div', 'panel-region-source ' + (this.options.location_g ? 'panel-region-source-ok' : 'panel-region-source-error'), el)
+    el = L.DomUtil.create('div', 'panel-region-source ' + (this.options.location_g ? 'panel-region-source-ok' : 'panel-region-source-error'), el);
     el.innerHTML = 'G';
     el = L.DomUtil.create('td', '', parent);
     el.style.width = '12px';
-    el = L.DomUtil.create('div', 'panel-region-source ' + (this.options.location_y ? 'panel-region-source-ok' : 'panel-region-source-error'), el)
+    el = L.DomUtil.create('div', 'panel-region-source ' + (this.options.location_y ? 'panel-region-source-ok' : 'panel-region-source-error'), el);
     el.innerHTML = 'Y';
     el = L.DomUtil.create('td', '', parent);
     el.style.width = '12px';
-    el = L.DomUtil.create('div', 'panel-region-source ' + (this.options.location_m ? 'panel-region-source-ok' : 'panel-region-source-error'), el)
+    el = L.DomUtil.create('div', 'panel-region-source ' + (this.options.location_m ? 'panel-region-source-ok' : 'panel-region-source-error'), el);
     el.innerHTML = 'M';
+    L.DomEvent
+      .addListener(dec, 'click', L.DomEvent.stopPropagation)
+      .addListener(dec, 'click', L.DomEvent.preventDefault)
+      .addListener(dec, 'click', function(ev) {
+        if ((this.options.size -= 50) < 50) this.options.size = 50;
+        this.removeFromMapPolygon();
+        this.addToMapPolygon();
+        this.redrawSidebar();
+      }, this);
+    L.DomEvent
+      .addListener(inc, 'click', L.DomEvent.stopPropagation)
+      .addListener(inc, 'click', L.DomEvent.preventDefault)
+      .addListener(inc, 'click', function(ev) {
+        if ((this.options.size += 50) > 5000) this.options.size = 5000;
+        this.removeFromMapPolygon();
+        this.addToMapPolygon();
+        this.redrawSidebar();
+      }, this);
     return el;
   },
 

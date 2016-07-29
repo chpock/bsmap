@@ -146,6 +146,7 @@ function ObjectBS (options) {
     this.updateBSTitle();
     this.options.title = '';
   }
+  this.initial = options && options.initial;
 }
 UtilsMapBS.extend(ObjectMapBS, ObjectBS, {
   addToMap: function () {
@@ -156,6 +157,11 @@ UtilsMapBS.extend(ObjectMapBS, ObjectBS, {
         draggable: true,
         title: this.options.title
       }).addTo(this.map());
+
+      if (this.initial) {
+        this.marker.bounce(1);
+        delete this.initial;
+      }
 
       this.marker.on('mouseover',function(){
         L.DomUtil.addClass($('#tbl_bs .panel-item')[this.collection.indexOf(this)], 'panel-item-active');
@@ -226,13 +232,19 @@ UtilsMapBS.extend(ObjectMapBS, ObjectBS, {
   },
 
   removeFromMap: function () {
-    if (this.marker) this.map().removeLayer(this.marker);
+    if (this.marker) {
+      this.map().removeLayer(this.marker);
+      delete this.marker;
+    }
     this.removeFromMapPolygon();
     return this;
   },
 
   removeFromMapPolygon: function () {
-    if (this.polygon) this.map().removeLayer(this.polygon);
+    if (this.polygon) {
+      this.map().removeLayer(this.polygon);
+      delete this.polygon;
+    }
     return this;
   },
 
@@ -262,11 +274,32 @@ UtilsMapBS.extend(ObjectMapBS, ObjectBS, {
     var el;
     el = L.DomUtil.create('td','panel-column', parent);
     el.style.width = '17px';
-    var dec = L.DomUtil.create('img', 'panel-item-close', el);
-    dec.src = 'images/left.png';
-    dec.style.padding = '0px 1px 0px 0px';
-    var inc = L.DomUtil.create('img', 'panel-item-close', el);
-    inc.src = 'images/right.png';
+    if (!this.deleted) {
+      var dec = L.DomUtil.create('img', 'panel-item-close', el);
+      dec.src = 'images/left.png';
+      dec.style.padding = '0px 1px 0px 0px';
+      var inc = L.DomUtil.create('img', 'panel-item-close', el);
+      inc.src = 'images/right.png';
+
+      L.DomEvent
+        .addListener(dec, 'click', L.DomEvent.stopPropagation)
+        .addListener(dec, 'click', L.DomEvent.preventDefault)
+        .addListener(dec, 'click', function(ev) {
+          if ((this.options.size -= 50) < 50) this.options.size = 50;
+          this.removeFromMapPolygon();
+          this.addToMapPolygon();
+          this.redrawSidebar();
+        }, this);
+      L.DomEvent
+        .addListener(inc, 'click', L.DomEvent.stopPropagation)
+        .addListener(inc, 'click', L.DomEvent.preventDefault)
+        .addListener(inc, 'click', function(ev) {
+          if ((this.options.size += 50) > 5000) this.options.size = 5000;
+          this.removeFromMapPolygon();
+          this.addToMapPolygon();
+          this.redrawSidebar();
+        }, this);
+    }
     el = L.DomUtil.create('td', 'panel-column', parent);
     if (this.options.title === '') {
       el.innerHTML = UtilsMapBS.escapeHTML(this.options.location.lat + ', ' + this.options.location.lng);
@@ -277,42 +310,27 @@ UtilsMapBS.extend(ObjectMapBS, ObjectBS, {
     el.style.width = '1.9em';
     el.style.textAlign = 'right';
     el.innerHTML = UtilsMapBS.escapeHTML(this.options.azimut);
-    L.DomEvent
-      .addListener(dec, 'click', L.DomEvent.stopPropagation)
-      .addListener(dec, 'click', L.DomEvent.preventDefault)
-      .addListener(dec, 'click', function(ev) {
-        if ((this.options.size -= 50) < 50) this.options.size = 50;
-        this.removeFromMapPolygon();
-        this.addToMapPolygon();
-        this.redrawSidebar();
-      }, this);
-    L.DomEvent
-      .addListener(inc, 'click', L.DomEvent.stopPropagation)
-      .addListener(inc, 'click', L.DomEvent.preventDefault)
-      .addListener(inc, 'click', function(ev) {
-        if ((this.options.size += 50) > 5000) this.options.size = 5000;
-        this.removeFromMapPolygon();
-        this.addToMapPolygon();
-        this.redrawSidebar();
-      }, this);
-    return el;
   },
 
   onClickSidebar: function() {
     if (this.map() && this.options.location) this.map().flyTo(this.options.location);
   },
+
   onMouseOverSidebar: function() {
     if (this.animate_sidebar || !this.polygon) return;
     var self = this;
-    var animate = function ani(direction) {
-      self.polygon.setStyle({fillOpacity: self.polygon.options.fillOpacity*(1.0+0.18*direction)});
-      direction = self.polygon.options.fillOpacity < 0.27*0.3 ? 1 : self.polygon.options.fillOpacity > 0.27*1.9 ? -1 : direction;
+    var animate = function(direction) {
+      if (self.polygon) {
+        self.polygon.setStyle({fillOpacity: self.polygon.options.fillOpacity*(1.0+0.18*direction)});
+        direction = self.polygon.options.fillOpacity < 0.27*0.3 ? 1 : self.polygon.options.fillOpacity > 0.27*1.9 ? -1 : direction;
+      }
       self.animate_sidebar = setTimeout(function(){
-        ani(direction);
+        animate(direction);
       }, 40);
     };
     animate(1);
   },
+
   onMouseOutSidebar: function() {
     if (this.animate_sidebar) {
       clearTimeout(this.animate_sidebar);
@@ -327,7 +345,8 @@ UtilsMapBS.extend(ObjectMapBS, ObjectBS, {
 
 function ObjectRegion(options) {
   ObjectMapBS.call(this, {
-    size: 500,
+    size: 650,
+    color: 0,
     lac: 0,
     cid: 0,
     mnc: 0,
@@ -336,6 +355,7 @@ function ObjectRegion(options) {
     location_y: null,
     location_m: null
   }, options);
+  this.initial = options && options.initial;
 }
 UtilsMapBS.extend(ObjectMapBS, ObjectRegion, {
   addToMap: function() {
@@ -383,9 +403,13 @@ UtilsMapBS.extend(ObjectMapBS, ObjectRegion, {
           title: '',
           icon: icon
         }).addTo(this.map());
+        if (this.initial) {
+          this[locs[i].marker_var].bounce(1);
+        }
         this[locs[i].marker_var].on('mouseover', func_mouseover, this);
         this[locs[i].marker_var].on('mouseout', func_mouseout, this);
       }
+      delete this.initial;
       this.addToMapPolygon();
     }
     return this;
@@ -397,106 +421,72 @@ UtilsMapBS.extend(ObjectMapBS, ObjectRegion, {
       if (!point) return [];
       var d2r = Math.PI / 180;
       var r2d = 180 / Math.PI;
-      var earthsradius = 3963;
       var points = 32;
       var rlat = ((parseFloat(this.options.size) || 50.0) / 6378100) * r2d;
       var rlng = rlat / Math.cos(point.lat * d2r);
       var extp = [];
       var start = 0, end = points + 1, ex, ey, theta;
-      for (var i=start; i < end; i += 1) {
-        theta = Math.PI * (i / (points/2));
+      for (var i = start; i < end; i += 1) {
+        theta = Math.PI * (i / (points / 2));
         ey = point.lng + (rlng * Math.cos(theta)); // center a + radius x * cos(theta)
         ex = point.lat + (rlat * Math.sin(theta)); // center b + radius y * sin(theta)
         extp.push(new L.LatLng(ex, ey));
       }
       return extp;
     };
-    var sortPoints = function(points) {
-      if (!points.length) return [];
-      var dest = [points[0]];
-      points.splice(0,1);
-      var distance;
-      var current = 0;
-      var min_distance, min_index;
-      while(points.length) {
-        min_distance = null;
-        for (var i = points.length - 1; i >= 0; i--) {
-          distance = Math.sqrt(Math.pow(Math.abs(points[i].lat - dest[current].lat),2) + Math.pow(Math.abs(points[i].lng - dest[current].lng),2));
-          if (!min_distance || distance < min_distance) {
-            min_distance = distance;
-            min_index = i;
-          }
-        }
-        dest.push(points[min_index]);
-        points.splice(min_index, 1);
-        current++;
-      }
-      return dest;
-    };
-    var concatPolygons = function(base, add) {
-      var i, j = base.length - 1, test, r = [], p;
-      for (p = add.length - 1; p >= 0; p--) {
-        test = false;
-        for (i = 0; i < base.length; i++) {
-          if (base[i].lng < add[p].lng && base[j].lng >= add[p].lng || base[j].lng < add[p].lng && base[i].lng >= add[p].lng)
-            if (base[i].lat + (add[p].lng - base[i].lng)/(base[j].lng-base[i].lng)*(base[j].lat-base[i].lat) < add[p].lat)
-              test = !test;
-          j = i;
-        }
-        if (!test) r.push(add[p]);
-      }
-      if ((r.length !== add.length) || !add.length) {
-        j = add.length - 1;
-        for (p = base.length - 1; p >= 0; p--) {
-          test = false;
-          for (i = 0; i < add.length; i++) {
-            if (add[i].lng < base[p].lng && add[j].lng >= base[p].lng || add[j].lng < base[p].lng && add[i].lng >= base[p].lng)
-              if (add[i].lat + (base[p].lng - add[i].lng)/(add[j].lng-add[i].lng)*(add[j].lat-add[i].lat) < base[p].lat)
-                test = !test;
-            j = i;
-          }
-          if (!test) r.push(base[p]);
-        }
-        return sortPoints(r);
-      }
-      return r;
-    };
-    var appendPolygon = function(location) {
-      var points = drawCircle.call(this, location);
-    };
     if(this.map()) {
       var points = [];
-      points = concatPolygons(points,drawCircle.call(this, this.options.location_g));
-      console.log(points.length);
-      points = concatPolygons(points,drawCircle.call(this, this.options.location_y));
-      console.log(points.length);
-      points = concatPolygons(points,drawCircle.call(this, this.options.location_m));
-      console.log(points.length);
+      if (this.options.location_g) points.push(drawCircle.call(this, this.options.location_g));
+      if (this.options.location_y) points.push(drawCircle.call(this, this.options.location_y));
+      if (this.options.location_m) points.push(drawCircle.call(this, this.options.location_m));
       if (points.length) {
         this.polygon = L.polygon(points, {
           stroke: true,
           weight: 1,
-          color: '#00dd00',
+          color: this.options.color,
           opacity: 0.7,
-          fillColor: '#00dd00',
+          fillColor: this.options.color,
           fillOpacity: 0.27,
-          clickable: true
+          clickable: true,
+          fillRule: 'nonzero'
         }).addTo(this.map());
+
+        this.polygon.on('mouseover',function(){
+          L.DomUtil.addClass($('#tbl_region .panel-item')[this.collection.indexOf(this)], 'panel-item-active');
+        },this);
+
+        this.polygon.on('mouseout',function(){
+          $('#tbl_region .panel-item-active').each(function(){
+            L.DomUtil.removeClass($(this)[0], 'panel-item-active');
+          });
+        },this);
       }
     }
     return this;
   },
 
   removeFromMap: function () {
-    if (this.marker_g) this.map().removeLayer(this.marker_g);
-    if (this.marker_y) this.map().removeLayer(this.marker_y);
-    if (this.marker_m) this.map().removeLayer(this.marker_m);
+    if (this.marker_g) {
+      this.map().removeLayer(this.marker_g);
+      delete this.marker_g;
+    }
+    if (this.marker_y) {
+      this.map().removeLayer(this.marker_y);
+      delete this.marger_y;
+    }
+    if (this.marker_m) {
+      this.map().removeLayer(this.marker_m);
+      delete this.marker_m;
+    }
     this.removeFromMapPolygon();
     return this;
   },
 
   removeFromMapPolygon: function () {
-    if (this.polygon) this.map().removeLayer(this.polygon);
+    if (this.polygon) {
+      this.map().removeLayer(this.polygon);
+      delete this.polygon;
+    }
     return this;
   },
 
@@ -504,11 +494,31 @@ UtilsMapBS.extend(ObjectMapBS, ObjectRegion, {
     var el, img;
     el = L.DomUtil.create('td','panel-column', parent);
     el.style.width = '17px';
-    var dec = L.DomUtil.create('img', 'panel-item-close', el);
-    dec.src = 'images/left.png';
-    dec.style.padding = '0px 1px 0px 0px';
-    var inc = L.DomUtil.create('img', 'panel-item-close', el);
-    inc.src = 'images/right.png';
+    if (!this.deleted) {
+      var dec = L.DomUtil.create('img', 'panel-item-close', el);
+      dec.src = 'images/left.png';
+      dec.style.padding = '0px 1px 0px 0px';
+      var inc = L.DomUtil.create('img', 'panel-item-close', el);
+      inc.src = 'images/right.png';
+      L.DomEvent
+        .addListener(dec, 'click', L.DomEvent.stopPropagation)
+        .addListener(dec, 'click', L.DomEvent.preventDefault)
+        .addListener(dec, 'click', function(ev) {
+          if ((this.options.size -= 50) < 50) this.options.size = 50;
+          this.removeFromMapPolygon();
+          this.addToMapPolygon();
+          this.redrawSidebar();
+        }, this);
+      L.DomEvent
+        .addListener(inc, 'click', L.DomEvent.stopPropagation)
+        .addListener(inc, 'click', L.DomEvent.preventDefault)
+        .addListener(inc, 'click', function(ev) {
+          if ((this.options.size += 50) > 5000) this.options.size = 5000;
+          this.removeFromMapPolygon();
+          this.addToMapPolygon();
+          this.redrawSidebar();
+        }, this);
+    }
     el = L.DomUtil.create('td', 'panel-column', parent);
     el.style.width = '12px';
     el.style.paddingRight = '5px';
@@ -530,30 +540,12 @@ UtilsMapBS.extend(ObjectMapBS, ObjectRegion, {
     el.style.width = '12px';
     el = L.DomUtil.create('div', 'panel-region-source ' + (this.options.location_m ? 'panel-region-source-ok' : 'panel-region-source-error'), el);
     el.innerHTML = 'M';
-    L.DomEvent
-      .addListener(dec, 'click', L.DomEvent.stopPropagation)
-      .addListener(dec, 'click', L.DomEvent.preventDefault)
-      .addListener(dec, 'click', function(ev) {
-        if ((this.options.size -= 50) < 50) this.options.size = 50;
-        this.removeFromMapPolygon();
-        this.addToMapPolygon();
-        this.redrawSidebar();
-      }, this);
-    L.DomEvent
-      .addListener(inc, 'click', L.DomEvent.stopPropagation)
-      .addListener(inc, 'click', L.DomEvent.preventDefault)
-      .addListener(inc, 'click', function(ev) {
-        if ((this.options.size += 50) > 5000) this.options.size = 5000;
-        this.removeFromMapPolygon();
-        this.addToMapPolygon();
-        this.redrawSidebar();
-      }, this);
-    return el;
   },
 
   setLocation: function (key, val) {
     this.removeFromMap();
     this.options[key] = val;
+    this.initial = true;
     this.addToMap();
     this.redrawSidebar();
   },
@@ -568,6 +560,31 @@ UtilsMapBS.extend(ObjectMapBS, ObjectRegion, {
         this.map().flyTo(this.options.location_m);
       }
     }
+  },
+
+  onMouseOverSidebar: function() {
+    if (this.animate_sidebar || !this.polygon) return;
+    var self = this;
+    var animate = function(direction) {
+      if (self.polygon) {
+        self.polygon.setStyle({fillOpacity: self.polygon.options.fillOpacity*(1.0+0.18*direction)});
+        direction = self.polygon.options.fillOpacity < 0.27*0.3 ? 1 : self.polygon.options.fillOpacity > 0.27*1.9 ? -1 : direction;
+      }
+      self.animate_sidebar = setTimeout(function(){
+        animate(direction);
+      }, 40);
+    };
+    animate(1);
+  },
+
+  onMouseOutSidebar: function() {
+    if (this.animate_sidebar) {
+      clearTimeout(this.animate_sidebar);
+      if (this.polygon) {
+        this.polygon.setStyle({fillOpacity: 0.27});
+      }
+      delete this.animate_sidebar;
+    }
   }
 
 });
@@ -577,6 +594,7 @@ function ObjectAddress(options){
     location: null,
     title: ''
   }, options);
+  this.initial = options && options.initial;
 }
 UtilsMapBS.extend(ObjectMapBS, ObjectAddress, {
   addToMap: function () {
@@ -586,6 +604,11 @@ UtilsMapBS.extend(ObjectMapBS, ObjectAddress, {
         keyboard: false,
         title: this.options.title
       }).addTo(this.map());
+
+      if (this.initial) {
+        this.marker.bounce(1);
+        delete this.initial;
+      }
 
       this.marker.on('mouseover',function(){
         L.DomUtil.addClass($('#tbl_address .panel-item')[this.collection.indexOf(this)], 'panel-item-active');
@@ -601,24 +624,52 @@ UtilsMapBS.extend(ObjectMapBS, ObjectAddress, {
   },
 
   removeFromMap: function () {
-    if (this.marker) this.map().removeLayer(this.marker);
+    if (this.marker) {
+      this.map().removeLayer(this.marker);
+      delete this.marker;
+    }
     return this;
   },
 
   getPanelElement: function (parent) {
     var el = L.DomUtil.create('td', 'panel-column', parent);
     el.innerHTML = UtilsMapBS.escapeHTML(this.options.title);
-    return el;
   },
 
   onClickSidebar: function() {
     if (this.map() && this.options.location) this.map().flyTo(this.options.location);
+  },
+
+  onMouseOverSidebar: function() {
+    console.log('in mouse over');
+    if (this.animate_sidebar || !this.marker || this.marker.isBouncing()) return;
+/*    var self = this;
+    var animate = function() {
+      if (self.marker) self.marker.bounce({duration: 500, height: 50});
+      self.animate_sidebar = setTimeout(function(){
+        animate();
+      }, 1000);
+    };
+    animate(); */
+    console.log('start bounce');
+    console.log(this.marker.isBouncing());
+    this.marker.bounce();
+    console.log(this.marker.isBouncing());
+  },
+
+  onMouseOutSidebar: function() {
+/*    if (this.animate_sidebar) {
+      clearTimeout(this.animate_sidebar);
+      delete this.animate_sidebar;
+    } */
+    if (this.marker) this.marker.stopBouncing();
   }
 
 });
 
 function ObjectBSMapCollection(opts){
   this.objects = [];
+  this.deleted = [];
   this.options = {
     map: null,
     sidebar: null,
@@ -640,15 +691,26 @@ ObjectBSMapCollection.prototype = {
   push: function (item, lockredraw) {
     item.removeFromMap();
     this.objects.push(item);
+    this.deleted.push(false);
     item.collection = this;
+    item.addToMap();
+    if (!lockredraw) this.redrawSidebar();
+    return item;
+  },
+  undelete: function (item, lockredraw) {
+    this.deleted[this.indexOf(item)] = false;
+    delete item.deleted;
+//    item.collection = this;
     item.addToMap();
     if (!lockredraw) this.redrawSidebar();
     return item;
   },
   delete: function (item, lockredraw) {
     item.removeFromMap();
-    delete item.collection;
-    this.objects.splice(this.indexOf(item),1);
+    item.deleted = true;
+//    delete item.collection;
+    this.deleted[this.indexOf(item)] = true;
+//    this.objects.splice(this.indexOf(item),1);
     if (!lockredraw) this.redrawSidebar();
     return item;
   },
@@ -669,7 +731,7 @@ ObjectBSMapCollection.prototype = {
   saveToStorage: function() {
     var save_data = [];
     for (var i = 0; i < this.objects.length; i++) {
-      save_data.push(this.objects[i].saveToObject());
+      if (!this.deleted[i]) save_data.push(this.objects[i].saveToObject());
     }
     $.localStorage.set(this.options.save_id, save_data);
     return this;
@@ -679,7 +741,7 @@ ObjectBSMapCollection.prototype = {
       var el, i, line, icon, func;
       while(this.options.sidebar.lastChild) this.options.sidebar.removeChild(this.options.sidebar.lastChild);
       for (i = 0; i < this.objects.length; i++) {
-        line = L.DomUtil.create('tr', 'panel-item', this.options.sidebar);
+        line = L.DomUtil.create('tr', this.deleted[i] ? 'panel-item-deleted' : 'panel-item', this.options.sidebar);
         el = L.DomUtil.create('td','panel-column', line);
         el.style.width = '1.5em';
         el.innerHTML = i+1 + '.';
@@ -687,22 +749,44 @@ ObjectBSMapCollection.prototype = {
         el = L.DomUtil.create('td','panel-column', line);
         el.style.width = '12px';
         icon = L.DomUtil.create('img', 'panel-item-close', el);
-        icon.src = 'images/close.png';
-        L.DomEvent.addListener(icon, 'mouseover', function(ev) {
-          ev.currentTarget.src = 'images/close-hover.png';
-        }, this);
-        L.DomEvent.addListener(icon, 'mouseout', function(ev) {
-          ev.currentTarget.src = 'images/close.png';
-        }, this);
-        L.DomEvent
-          .addListener(icon, 'click', L.DomEvent.stopPropagation)
-          .addListener(icon, 'click', L.DomEvent.preventDefault)
-          .addListener(icon, 'click', function(ev) {
-            this.collection.delete(this);
+        if (this.deleted[i]) {
+          icon.src = 'images/undo.png';
+          L.DomEvent.addListener(icon, 'mouseover', function(ev) {
+            ev.currentTarget.src = 'images/undo-hover.png';
+          }, this);
+          L.DomEvent.addListener(icon, 'mouseout', function(ev) {
+            ev.currentTarget.src = 'images/undo.png';
+          }, this);
+
+          L.DomEvent
+            .addListener(icon, 'click', L.DomEvent.stopPropagation)
+            .addListener(icon, 'click', L.DomEvent.preventDefault)
+            .addListener(icon, 'click', function(ev) {
+              this.collection.undelete(this);
+            }, this.objects[i]);
+        } else {
+          icon.src = 'images/close.png';
+          L.DomEvent.addListener(icon, 'mouseover', function(ev) {
+            ev.currentTarget.src = 'images/close-hover.png';
+          }, this);
+          L.DomEvent.addListener(icon, 'mouseout', function(ev) {
+            ev.currentTarget.src = 'images/close.png';
+          }, this);
+
+          L.DomEvent
+            .addListener(icon, 'click', L.DomEvent.stopPropagation)
+            .addListener(icon, 'click', L.DomEvent.preventDefault)
+            .addListener(icon, 'click', function(ev) {
+              this.collection.delete(this);
+            }, this.objects[i]);
+          L.DomEvent.addListener(line, 'click', this.objects[i].onClickSidebar, this.objects[i]);
+          L.DomEvent.addListener(line, 'mouseover', function(){
+            this.onMouseOverSidebar();
           }, this.objects[i]);
-        L.DomEvent.addListener(line, 'click', this.objects[i].onClickSidebar, this.objects[i]);
-        L.DomEvent.addListener(line, 'mouseover', this.objects[i].onMouseOverSidebar, this.objects[i]);
-        L.DomEvent.addListener(line, 'mouseout', this.objects[i].onMouseOutSidebar, this.objects[i]);
+          L.DomEvent.addListener(line, 'mouseout', function(){
+            this.onMouseOutSidebar();
+          }, this.objects[i]);
+        }
       }
     }
     if (!locksave) this.saveToStorage();
@@ -848,8 +932,9 @@ App.prototype = {
       location: ev.latlng,
       azimut: azimut,
       title: null,
-      color: this.panel.colorPickerGet(),
-      size: 500
+      color: this.panel.colorPickerBSGet(),
+      size: 500,
+      initial: true
     });
   },
   autocompleteChange: function(){
@@ -859,7 +944,7 @@ App.prototype = {
       return;
     }
 
-    this.map.panTo([place.geometry.location.lat(),place.geometry.location.lng()]);
+    this.map.flyTo([place.geometry.location.lat(),place.geometry.location.lng()]);
     this.autocompleteBound();
 
     var address = '';
@@ -873,7 +958,8 @@ App.prototype = {
 
     this.collection_address.new({
       location: L.latLng([place.geometry.location.lat(),place.geometry.location.lng()]),
-      title: address
+      title: address,
+      initial: true
     });
 
     setTimeout(function(){
@@ -921,17 +1007,20 @@ App.prototype = {
     var onComplete = function() {
       console.log('on complite');
       if (!req.obj) {
-        if (req.g || req.y || req.m) {
+        var loc = req.g || req.y || req.m;
+        if (loc) {
+          this.map.flyTo([loc.lat,loc.lng]);
           req.obj = this.collection_region.new({
+            color: this.panel.colorPickerRegionGet(),
             lac: lac,
             cid: cid,
             mnc: mnc,
             mcc: mcc,
             location_g: req.g,
             location_y: req.y,
-            location_m: req.m
+            location_m: req.m,
+            initial: true
           });
-          req.obj.onClickSidebar();
         }
       } else {
         if (req.g) req.obj.setLocation('location_g', req.g);

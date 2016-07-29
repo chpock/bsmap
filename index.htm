@@ -58,16 +58,21 @@ body {
 }
 .panel-item {
 }
+.panel-item-deleted {
+  color: #555555;
+}
 .panel-column {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-5}
+}
 .panel-item-active {
-  background: #ddddee;
+  background: #aaaacc;
+  font-weight: bold;
 }
 .panel-item:hover {
   outline: 1px solid #000099;
+  font-weight: bold;
 }
 .panel-item-close {
 }
@@ -94,6 +99,7 @@ body {
 <script src="libs/jquery/plugins/jquery.noty.packaged.min.js"></script>
 <script src="libs/jquery/plugins/jquery.color-2.1.2.min.js"></script>
 <script src="libs/leaflet/leaflet.js"></script>
+<script src="libs/leaflet/plugins/leaflet.smoothmarkerbouncing.js"></script>
 <script src="tab-panel.js"></script>
 <script src="noty.theme.js"></script>
 <script>

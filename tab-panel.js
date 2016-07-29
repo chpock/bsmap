@@ -58,8 +58,8 @@ L.Control.Panel = L.Control.extend({
     el = L.DomUtil.create('span', 'tab-panel-label', line);
     el.style.marginLeft = '10px';
     el.innerHTML = "Цвет сектора:";
-    this.colorpicker = this.colorPickerSet('#0000ff', this.colorPicker());
-    line.appendChild(this.colorpicker);
+    this.colorpicker_bs = this.colorPickerSet('#0000ff', this.colorPicker());
+    line.appendChild(this.colorpicker_bs);
     L.DomUtil.create('div', 'tab-panel-inputbar-separator', this.inputs[1]);
     line = L.DomUtil.create('div', 'tab-panel-inputbar-help', this.inputs[1]);
     line.innerHTML = 'Для того, что бы <b>построить</b> БС - введите требуемый азимут, выберите цвет и кликните левой клавишей мышки на карте в месте ее расположения. Для <b>перемещения</b> построенной БС - перетащите маркер.';
@@ -120,15 +120,22 @@ L.Control.Panel = L.Control.extend({
     el.style.perspective =  '780px';
     el.style.margin = '0px 0px 0px 10px';
     el.style.fontSize = '11px';
+    el.style.height = '15px';
     el.innerHTML = 'Начать поиск';
     L.DomEvent.addListener(el, 'click', function(ev){
       L.DomEvent.stopPropagation(ev);
       this._lookupRegion();
     }, this);
 
+    line = L.DomUtil.create('div', 'tab-panel-inputbar', this.inputs[2]);
+    line.style.margin = '4px 0px 0px 0px';
+    L.DomUtil.create('span', 'tab-panel-label', line).innerHTML = "Цвет региона:";
+    this.colorpicker_region = this.colorPickerSet('#ff0000', this.colorPicker());
+    line.appendChild(this.colorpicker_region);
+
     L.DomUtil.create('div', 'tab-panel-inputbar-separator', this.inputs[2]);
     line = L.DomUtil.create('div', 'tab-panel-inputbar-help', this.inputs[2]);
-    line.innerHTML = 'No help. В процессе разработки.';
+    line.innerHTML = 'Для того, что бы <b>построить</b> примерную область работы БС - выберите оператора, LAC и CellID базовой станции, цвет области и нажмите кнопку <b>\"Начать поиск\"</b>.';
 
     L.DomEvent.disableClickPropagation(container);
 
@@ -196,7 +203,6 @@ L.Control.Panel = L.Control.extend({
   },
 
   colorPickerSet: function(color, cp) {
-    if (!cp) cp = this.colorpicker;
     var el = document.createElement('div');
     el.style.backgroundColor = color;
     color = el.style.backgroundColor;
@@ -208,8 +214,20 @@ L.Control.Panel = L.Control.extend({
   },
 
   colorPickerGet: function(cp) {
-    if (!cp) cp = this.colorpicker;
     for (var i = 0; i < cp.children.length; i++) if (cp.children[i].style.outline !== '') return cp.children[i].style.backgroundColor;
     return '#000000';
+  },
+
+  colorPickerBSGet: function() {
+    return this.colorPickerGet(this.colorpicker_bs);
+  },
+  colorPickerBSSet: function(color) {
+    return this.colorPickerSet(color, this.colorpicker_bs);
+  },
+  colorPickerRegionGet: function() {
+    return this.colorPickerGet(this.colorpicker_region);
+  },
+  colorPickerRegionSet: function(color) {
+    return this.colorPickerSet(color, this.colorpicker_region);
   }
 });

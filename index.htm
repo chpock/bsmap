@@ -90,6 +90,34 @@ body {
 .panel-region-source-error {
   background-image: url(images/region-error.png);
 }
+.save-button {
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  border-radius: 7px;
+  border: 1px solid #000000;
+
+  font: normal 12px Tahoma;
+
+  padding-top: 3px;
+  padding-bottom: 3px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 3px 0px 3px;
+
+  background-color: #ffffff;
+
+  cursor: pointer;
+
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.save-button:hover {
+  border: 1px solid #ff0000;
+}
 </style>
 <link rel="stylesheet" href="libs/leaflet/leaflet.css">
 <link rel="stylesheet" href="loading.css">
@@ -132,7 +160,11 @@ body {
 <div class="panel-header">Базовые станции</div><table class="panel-table" id="tbl_bs"></table>
 <div class="panel-header">Адреса</div><table class="panel-table" id="tbl_address"></table>
 <div class="panel-header">Регионы</div><table class="panel-table" id="tbl_region"></table>
-<div class="panel-header">Сохранено</div><div id="tbl_save"></div>
+<div class="panel-header" style="text-align: center;">
+  <span class="save-button" id="save-button">Сохранить</span>
+  <span class="save-button" id="saveas-button">Сохранить как...</span>
+  <span class="save-button" id="new-button">Новая карта</span>
+</div><div id="tbl_save"></div>
 </div>
 <script src="map.js"></script>
 </body>

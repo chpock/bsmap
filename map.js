@@ -589,6 +589,103 @@ UtilsMapBS.extend(ObjectMapBS, ObjectRegion, {
 
 });
 
+function ObjectSaves(options){
+  ObjectMapBS.call(this, {
+    title: '',
+    center: null,
+    zoom: null,
+    data: {},
+    current: null
+  }, options);
+}
+UtilsMapBS.extend(ObjectMapBS, ObjectSaves, {
+
+  getPanelElement: function (parent) {
+    var el;
+    el = L.DomUtil.create('td','panel-column', parent);
+    el.style.width = '12px';
+    if (this.options.current && !this.deleted) {
+      L.DomUtil.create('img', 'panel-item-close', el).src = 'images/save-active.png';
+    }
+    el = L.DomUtil.create('td', 'panel-column', parent);
+    el.innerHTML = UtilsMapBS.escapeHTML(this.options.title);
+    if (this.options.current && !this.deleted) {
+      el.style.backgroundColor = '';
+      L.DomUtil.addClass(el, 'save-active');
+    }
+  },
+
+  getCurrentMapState: function() {
+    this.options.data = {};
+    for (var k in app.collection) {
+      if (!app.collection.hasOwnProperty(k) || k === 'save') continue;
+      this.options.data[k] = app.collection[k].saveToObject();
+    }
+    this.options.center = app.map.getCenter();
+    this.options.zoom = app.map.getZoom();
+    this.options.current = true;
+    if (this.collection) this.collection.currentUpdate(this);
+  },
+
+  setCurrentMapState: function() {
+    this.options.current = true;
+    for (var k in app.collection) {
+      if (!app.collection.hasOwnProperty(k) || k === 'save') continue;
+      if (this.options.data[k]) {
+        app.collection[k].loadFromObject(this.options.data[k]);
+        app.collection[k].saveToStorage();
+      }
+    }
+    if (this.options.center) app.map.flyTo(this.options.center, this.options.zoom);
+    if (this.collection) {
+      this.collection.currentUpdate(this);
+      this.collection.redrawSidebar();
+    }
+    return this;
+  },
+
+  onClickSidebar: function() {
+    noty({
+      text: 'Вы действительно хотите загрузить карту с именем "' + UtilsMapBS.escapeHTML(this.options.title) + '"?',
+      type: 'confirm',
+      timeout: false,
+      layout: 'center',
+      theme: 'bsmap',
+      modal: true,
+      buttons: [
+        {
+          addClass: 'btn btn-primary',
+          text: 'Загрузить',
+          onClick: (function(self){
+            return function($noty) {
+              $noty.close();
+              self.setCurrentMapState();
+              noty({
+                text: 'Карта успешно загружена.',
+                type: 'success',
+                timeout: 2000,
+                layout: 'center'
+              });
+            };
+          })(this)
+        },{
+          addClass: 'btn btn-danger',
+          text: 'Отмена',
+          onClick: function($noty) {
+            noty({
+              text: 'Вы отказались от загрузки карты',
+              type: 'warning',
+              timeout: 2000,
+              layout: 'center'
+            });
+            $noty.close();
+          }
+        }
+      ]
+    });
+  }
+});
+
 function ObjectAddress(options){
   ObjectMapBS.call(this, {
     location: null,
@@ -641,7 +738,7 @@ UtilsMapBS.extend(ObjectMapBS, ObjectAddress, {
   },
 
   onMouseOverSidebar: function() {
-    console.log('in mouse over');
+//    console.log('in mouse over');
     if (this.animate_sidebar || !this.marker || this.marker.isBouncing()) return;
 /*    var self = this;
     var animate = function() {
@@ -651,10 +748,7 @@ UtilsMapBS.extend(ObjectMapBS, ObjectAddress, {
       }, 1000);
     };
     animate(); */
-    console.log('start bounce');
-    console.log(this.marker.isBouncing());
     this.marker.bounce();
-    console.log(this.marker.isBouncing());
   },
 
   onMouseOutSidebar: function() {
@@ -719,22 +813,45 @@ ObjectBSMapCollection.prototype = {
       if (this.objects[i] === item) return i;
     throw new Error('indexOf: item not in collection.');
   },
+  emptify: function (lockredraw) {
+    console.log('emptify ' + this.options.save_id);
+    for (var i = this.objects.length - 1; i >= 0; i--) {
+      this.delete(this.objects[i], true);
+    }
+    this.deleted = [];
+    this.objects = [];
+    if (!lockredraw) this.redrawSidebar();
+    return this;
+  },
   loadFromStorage: function() {
+    console.log('loadFromStorage ' + this.options.save_id);
     if ($.localStorage.isSet(this.options.save_id) && !$.localStorage.isEmpty(this.options.save_id)) {
-      var objs = $.localStorage.get(this.options.save_id);
-      for (var i = 0; i < objs.length; i++)
-        this.new(objs[i], true);
-      this.redrawSidebar(true);
+      this.loadFromObject($.localStorage.get(this.options.save_id));
+    } else {
+      this.emptify(true);
     }
     return this;
   },
   saveToStorage: function() {
+    console.log('saveToStorage ' + this.options.save_id);
+    $.localStorage.set(this.options.save_id, this.saveToObject());
+    return this;
+  },
+  loadFromObject: function (objs) {
+    console.log('loadFromObject ' + this.options.save_id);
+    this.emptify(true);
+    for (var i = 0; i < objs.length; i++)
+      this.new(objs[i], true);
+    this.redrawSidebar(true);
+    return this;
+  },
+  saveToObject: function () {
+    console.log('saveToObject ' + this.options.save_id);
     var save_data = [];
     for (var i = 0; i < this.objects.length; i++) {
       if (!this.deleted[i]) save_data.push(this.objects[i].saveToObject());
     }
-    $.localStorage.set(this.options.save_id, save_data);
-    return this;
+    return save_data;
   },
   redrawSidebar: function (locksave) {
     if (this.options.sidebar) {
@@ -806,14 +923,17 @@ function App(){
       tms: true,
       attribution: 'Данные компании © <a href="http://visicom.ua/">Визиком</a>',
       subdomains: '123'
-    }),
+    })
+  };
+
+/* Stamen Toner tiles is not https :(
     'Stamen Toner': L.tileLayer('http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png', {
       attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
       subdomains: 'abcd',
       minZoom: 0,
       maxZoom: 20
-    })
-  };
+    }) */
+
 
   if ($.localStorage.isSet('map') && !$.localStorage.isEmpty('map')) {
     try {
@@ -864,24 +984,143 @@ function App(){
   this.panel = new L.Control.Panel();
   this.map.addControl(this.panel);
 
-  this.collection_address = new ObjectBSMapCollection({
+  this.collection = {};
+
+  this.collection.address = new ObjectBSMapCollection({
     map: this.map,
     sidebar: $('#tbl_address')[0],
     save_id: 'tbl_address',
     objects: ObjectAddress
   }).loadFromStorage();
-  this.collection_bs = new ObjectBSMapCollection({
+
+  this.collection.bs = new ObjectBSMapCollection({
     map: this.map,
     sidebar: $('#tbl_bs')[0],
     save_id: 'tbl_bs',
     objects: ObjectBS
   }).loadFromStorage();
-  this.collection_region = new ObjectBSMapCollection({
+
+  this.collection.region = new ObjectBSMapCollection({
     map: this.map,
     sidebar: $('#tbl_region')[0],
     save_id: 'tbl_region',
     objects: ObjectRegion
   }).loadFromStorage();
+
+  this.collection.save = new ObjectBSMapCollection({
+    map: this.map,
+    sidebar: $('#tbl_save')[0],
+    save_id: 'tbl_save',
+    objects: ObjectSaves
+  });
+  this.collection.save.currentUpdate = function(item) {
+    if (item && item.options.current && !item.deleted) {
+      for (var i = this.objects.length - 1; i >= 0; i--)
+        if (this.objects[i] !== item) this.objects[i].options.current = false;
+    }
+    if (this.currentGet()) {
+      L.DomUtil.removeClass($('#save-button')[0], 'save-button-disabled');
+    } else {
+      L.DomUtil.addClass($('#save-button')[0], 'save-button-disabled');
+    }
+    return this;
+  };
+  this.collection.save.currentGet = function() {
+    for (var i = this.objects.length - 1; i >= 0; i--)
+      if (this.objects[i].options.current && !this.deleted[i]) return this.objects[i];
+    return;
+  };
+  this.collection.save.currentReset = function() {
+    for (var i = this.objects.length - 1; i >= 0; i--)
+      this.objects[i].options.current = false;
+    this.currentUpdate();
+    this.redrawSidebar();
+  };
+  this.collection.save.loadFromStorage();
+
+  L.DomEvent.addListener($('#new-button')[0], 'click', function(){
+    noty({
+      text: 'Вы действительно хотите очистить карту?',
+      type: 'confirm',
+      timeout: false,
+      layout: 'center',
+      theme: 'bsmap',
+      modal: true,
+      buttons: [
+        {
+          addClass: 'btn btn-primary',
+          text: 'Очистить',
+          onClick: (function(self){
+            return function($noty) {
+              $noty.close();
+              for (var k in app.collection) {
+                if (app.collection.hasOwnProperty(k) && k !== 'save')
+                  app.collection[k].emptify();
+              }
+              self.collection.save.currentReset();
+            };
+          })(this)
+        },{
+          addClass: 'btn btn-danger',
+          text: 'Отмена',
+          onClick: function($noty) {
+            $noty.close();
+          }
+        }
+      ]
+    });
+  }, this);
+
+  L.DomEvent.addListener($('#save-button')[0], 'click', function(){
+    var save = this.collection.save.currentGet();
+    if (!save) return;
+    save.getCurrentMapState();
+    save.redrawSidebar();
+    noty({
+      text: 'Карта "' + UtilsMapBS.escapeHTML(save.options.title) + '" успешно сохранена.',
+      type: 'success',
+      timeout: 2000,
+      layout: 'bottomCenter'
+    });
+  }, this);
+
+  L.DomEvent.addListener($('#saveas-button')[0], 'click', function(){
+    if (L.DomUtil.hasClass(this, 'save-button-disabled')) return;
+    $('.save-dialog').slideDown(300);
+    L.DomUtil.addClass(this, 'save-button-disabled');
+  }, $('#saveas-button')[0]);
+
+  L.DomEvent.addListener($('#save-dialog-button-cancel')[0], 'click', function(){
+    $('.save-dialog').slideUp(300);
+    L.DomUtil.removeClass($('#saveas-button')[0], 'save-button-disabled');
+  }, this);
+
+  L.DomEvent.addListener($('#save-dialog-button-ok')[0], 'click', function(){
+    var title = String($('#save-dialog-input-title').val()).trim();
+    if (title === '') {
+      noty({
+        text: 'Невозможно сохранить состояние карты с пустым именем.',
+        type: 'error',
+        timeout: 5000,
+        layout: 'bottom',
+        theme: 'bsmap'
+      });
+      $('#save-dialog-input-title').focus();
+      return;
+    }
+
+    var save = this.collection.save.new({
+      title: title,
+      current: true
+    });
+    this.collection.save.currentUpdate(save);
+
+    $('#save-button').click();
+
+    $('#save-dialog-input-title').val('');
+    $('#save-dialog-button-cancel').click();
+  }, this);
+
 }
 
 App.prototype = {
@@ -935,7 +1174,7 @@ App.prototype = {
       $('.tab-panel-input-azimut').focus();
       return;
     }
-    this.collection_bs.new({
+    this.collection.bs.new({
       location: ev.latlng,
       azimut: azimut,
       title: null,
@@ -963,7 +1202,7 @@ App.prototype = {
       ].join(', '));
     }
 
-    this.collection_address.new({
+    this.collection.address.new({
       location: L.latLng([place.geometry.location.lat(),place.geometry.location.lng()]),
       title: address,
       initial: true
@@ -1017,7 +1256,7 @@ App.prototype = {
         var loc = req.g || req.y || req.m;
         if (loc) {
           this.map.flyTo([loc.lat,loc.lng]);
-          req.obj = this.collection_region.new({
+          req.obj = this.collection.region.new({
             color: this.panel.colorPickerRegionGet(),
             lac: lac,
             cid: cid,

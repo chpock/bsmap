@@ -66,13 +66,11 @@
   -moz-border-radius: 7px;
   -webkit-border-radius: 7px;
   border-radius: 7px;
+  border: 1px solid #000000;
+
   width: 400px;
 
-  border: 1px solid #000000;
-  padding-top: 3px;
-  padding-bottom: 3px;
-  padding-left: 5px;
-  padding-right: 5px;
+  padding: 3px 5px;
 }
 .address-notfound {
   border: 1px solid #ff0000;
@@ -81,13 +79,11 @@
   -moz-border-radius: 7px;
   -webkit-border-radius: 7px;
   border-radius: 7px;
+  border: 1px solid #000000;
+
   width: 50px;
 
-  border: 1px solid #000000;
-  padding-top: 3px;
-  padding-bottom: 3px;
-  padding-left: 5px;
-  padding-right: 5px;
+  padding: 3px 5px;
 }
 .tab-panel-input-lac {
   -moz-border-radius: 7px;

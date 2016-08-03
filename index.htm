@@ -66,6 +66,11 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.panel-column.save-active {
+  font-weight: bold;
+  color: #001100;
+  background-color: #bbeebb;
+}
 .panel-item-active {
   background: #aaaacc;
   font-weight: bold;
@@ -98,10 +103,7 @@ body {
 
   font: normal 12px Tahoma;
 
-  padding-top: 3px;
-  padding-bottom: 3px;
-  padding-left: 5px;
-  padding-right: 5px;
+  padding: 3px 5px;
   margin: 3px 0px 3px;
 
   background-color: #ffffff;
@@ -116,7 +118,76 @@ body {
   user-select: none;
 }
 .save-button:hover {
-  border: 1px solid #ff0000;
+  border: 2px solid #ff0000;
+  padding: 2px 4px;
+}
+.save-button-disabled {
+  border: 1px solid #444444;
+  color: #222222;
+  background-color: #bbbbbb;
+}
+.save-button-disabled:hover {
+  border: 1px solid #444444;
+  padding: 3px 5px;
+}
+
+.save-dialog {
+  display: none;
+  white-space: nowrap;
+  padding: 3px 5px 3px;
+  font: normal 100% "Helvetica Neue", Arial, Helvetica, sans-serif;
+  margin: 0px 5px 5px 5px;
+  border-left: 1px solid #000000;
+  border-bottom: 1px solid #000000;
+  border-right: 1px solid #000000;
+}
+.save-dialog div:nth-child(2) {
+  text-align: center;
+}
+.save-dialog div {
+  margin: 4px 0px 9px 0px;
+}
+.save-dialog input {
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  border-radius: 7px;
+  border: 1px solid #000000;
+
+  width: 220px;
+
+  margin-left: 5px;
+  padding: 3px 5px;
+
+}
+.save-dialog-button {
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  border-radius: 7px;
+  border: 1px solid #000000;
+
+  font: normal 12px Tahoma;
+
+  padding: 3px 5px;
+  margin: 3px 5px 3px;
+
+  background-color: #ffffff;
+
+  cursor: pointer;
+
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.save-dialog-button.default {
+  border: 2px solid #000000;
+  padding: 2px 4px;
+}
+.save-dialog-button:hover {
+  border: 2px solid #ff0000;
+  padding: 2px 4px;
 }
 </style>
 <link rel="stylesheet" href="libs/leaflet/leaflet.css">
@@ -160,11 +231,16 @@ body {
 <div class="panel-header">Базовые станции</div><table class="panel-table" id="tbl_bs"></table>
 <div class="panel-header">Адреса</div><table class="panel-table" id="tbl_address"></table>
 <div class="panel-header">Регионы</div><table class="panel-table" id="tbl_region"></table>
-<div class="panel-header" style="text-align: center;">
-  <span class="save-button" id="save-button">Сохранить</span>
+<div class="panel-header" style="text-align: center;margin-bottom: 0px;">
+  <span class="save-button save-button-disabled" id="save-button">Сохранить</span>
   <span class="save-button" id="saveas-button">Сохранить как...</span>
   <span class="save-button" id="new-button">Новая карта</span>
-</div><div id="tbl_save"></div>
+</div>
+<div class="save-dialog">
+  <div><span class="label">Имя:</span><input id="save-dialog-input-title"></div>
+  <div><span class="save-dialog-button default" id="save-dialog-button-ok">Сохранить</span><span class="save-dialog-button" id="save-dialog-button-cancel">Отмена</span></div>
+</div>
+<table class="panel-table" id="tbl_save"></table>
 </div>
 <script src="map.js"></script>
 </body>

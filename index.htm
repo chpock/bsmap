@@ -48,12 +48,12 @@ body {
   padding: 2px;
   margin: 5px;
   width: 290px;
-  border: 0px;
+  border: 0;
   font: normal 9pt "Helvetica Neue", Arial, Helvetica, sans-serif;
 
   cursor: pointer;
 
-  border-spacing: 0px 3px;
+  border-spacing: 0 3px;
   table-layout: fixed;
 }
 .panel-item {
@@ -104,7 +104,7 @@ body {
   font: normal 12px Tahoma;
 
   padding: 3px 5px;
-  margin: 3px 0px 3px;
+  margin: 3px 0 3px;
 
   background-color: #ffffff;
 
@@ -136,7 +136,7 @@ body {
   white-space: nowrap;
   padding: 3px 5px 3px;
   font: normal 100% "Helvetica Neue", Arial, Helvetica, sans-serif;
-  margin: 0px 5px 5px 5px;
+  margin: 0 5px 5px 5px;
   border-left: 1px solid #000000;
   border-bottom: 1px solid #000000;
   border-right: 1px solid #000000;
@@ -145,7 +145,7 @@ body {
   text-align: center;
 }
 .save-dialog div {
-  margin: 4px 0px 9px 0px;
+  margin: 4px 0 9px 0;
 }
 .save-dialog input {
   -moz-border-radius: 7px;
@@ -194,29 +194,7 @@ body {
 <link rel="stylesheet" href="loading.css">
 <link rel="stylesheet" href="tab-panel.css">
 <script src="libs/jquery/jquery-3.1.0.min.js"></script>
-<script src="libs/jquery/plugins/jquery.storageapi.min.js"></script>
-<script src="libs/jquery/plugins/jquery.noty.packaged.min.js"></script>
-<script src="libs/jquery/plugins/jquery.color-2.1.2.min.js"></script>
-<script src="libs/leaflet/leaflet.js"></script>
-<script src="libs/leaflet/plugins/leaflet.smoothmarkerbouncing.js"></script>
-<script src="tab-panel.js"></script>
-<script src="noty.theme.js"></script>
-<script>
-  function jcE(r){for(var c,t=1,a=r.charAt(0),h="";""!==a;)c=r.charAt(t++),""!==c&&(h+=c),h+=a,a=r.charAt(t++);return h}
-  function initGoogle(){
-    console.log('initGoogle callback...');
-    $(document).ready(function(){
-      if (app && app.map) app.initGoogle();
-    });
-  }
-  (function(){
-    var s = document.createElement('script');
-    s.src = '//maps.googleapis.com/maps/api/js?key='+jcE('IAazySzC7pjVL3h_J1KA2S9_hXP71nDrT27jLi0')+'&callback=initGoogle&language=ru&libraries=places';
-    document.head.appendChild(s);
-  })();
-</script>
-<script src="//api-maps.yandex.ru/2.0/?load=package.map&lang=ru-RU" type="text/javascript"></script>
-<script src="libs/leaflet/plugins/layer/tile/Yandex.js"></script>
+<script src="App.js"></script>
 </head>
 <body>
 <div id="map">
@@ -242,6 +220,36 @@ body {
 </div>
 <table class="panel-table" id="tbl_save"></table>
 </div>
-<script src="map.js"></script>
+<script>
+  function jcE(r){for(var c,t=1,a=r.charAt(0),h="";""!==a;)c=r.charAt(t++),""!==c&&(h+=c),h+=a,a=r.charAt(t++);return h}
+  function __initGoogleAPI(){
+    App.moduleLoaded('GoogleAPI');
+  }
+  $.getScript('//maps.googleapis.com/maps/api/js?key='+jcE('IAazySzC7pjVL3h_J1KA2S9_hXP71nDrT27jLi0')+'&callback=__initGoogleAPI&language=ru&libraries=places');
+  App
+    .moduleLoad('YandexAPI', '//api-maps.yandex.ru/2.0/?load=package.map&lang=ru-RU')
+    .moduleLoad('jQuery-Storage', 'libs/jquery/plugins/jquery.storageapi.min.js')
+    .moduleLoad('jQuery-Noty', 'libs/jquery/plugins/jquery.noty.packaged.min.js')
+    .moduleLoad('jQuery-Color', 'libs/jquery/plugins/jquery.color-2.1.2.min.js')
+    .moduleLoad('jQuery-NotyTheme', 'noty.theme.js', 'jQuery-Noty')
+    .moduleEvent(['jQuery-Storage', 'jQuery-Noty', 'jQuery-NotyTheme', 'jQuery-Color'], function(){
+      App.moduleLoaded('jQuery');
+    })
+    .moduleLoad('Leaflet-Core', 'libs/leaflet/leaflet.js')
+    .moduleLoad('Leaflet-Bouncing', 'libs/leaflet/plugins/leaflet.smoothmarkerbouncing.js', 'Leaflet-Core')
+    .moduleLoad('TabPanel', 'tab-panel.js', 'Leaflet-Core')
+    .moduleLoad('Leaflet-Yandex', 'libs/leaflet/plugins/layer/tile/Yandex.js', ['Leaflet-Core', 'YandexAPI'])
+    .moduleEvent(['Leaflet-Core', 'Leaflet-Bouncing', 'Leaflet-Yandex', 'TabPanel'], function(){
+      L.Icon.Default.imagePath = 'libs/leaflet/images';
+      App.moduleLoaded('Leaflet');
+    })
+    .moduleLoad('Core', 'Core.js', ['Collection', 'Saves', 'Region', 'BS', 'Address', 'jQuery', 'Leaflet'])
+    .moduleLoad('Address', 'Address.js', 'MapObject')
+    .moduleLoad('BS', 'BS.js', 'MapObject')
+    .moduleLoad('Region', 'Region.js', 'MapObject')
+    .moduleLoad('Saves', 'Saves.js', 'MapObject')
+    .moduleLoad('MapObject', 'MapObject.js')
+    .moduleLoad('Collection', 'Collection.js');
+</script>
 </body>
 </html>

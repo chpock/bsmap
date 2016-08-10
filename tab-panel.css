@@ -18,10 +18,7 @@
   border-radius: 7px;
   border: 1px solid #000000;
 
-  padding-top: 3px;
-  padding-bottom: 3px;
-  padding-left: 10px;
-  padding-right: 10px;
+  padding: 3px 10px;
   margin: 5px;
 
   background-color: #ffffff;
@@ -43,12 +40,12 @@
   border: 1px solid #ff0000;
 }
 .tab-panel-inputbar-container {
-  padding: 5px 5px 0px;
+  padding: 5px 5px 0;
 }
 .tab-panel-inputbar-separator {
-  margin: 5px 0px;
+  margin: 5px 0;
   height: 1px;
-  padding: 0px;
+  padding: 0;
   background-color: #999999;
 }
 .tab-panel-inputbar-help {
@@ -57,7 +54,7 @@
 .tab-panel-inputbar {
   display: flex;
   align-items: center;
-  padding: 0px;
+  padding: 0;
 }
 .tab-panel-label {
   padding-right: 5px;
@@ -92,10 +89,7 @@
   width: 50px;
 
   border: 1px solid #000000;
-  padding-top: 3px;
-  padding-bottom: 3px;
-  padding-left: 5px;
-  padding-right: 5px;
+  padding: 3px 5px;
 }
 .tab-panel-input-cid {
   -moz-border-radius: 7px;
@@ -104,19 +98,16 @@
   width: 50px;
 
   border: 1px solid #000000;
-  padding-top: 3px;
-  padding-bottom: 3px;
-  padding-left: 5px;
-  padding-right: 5px;
+  padding: 3px 5px;
 }
-span.tab-panel-region-btn {
+.tab-panel-region-btn {
   padding: 3px;
 }
-span.tab-panel-region-btn-active {
+.tab-panel-region-btn-active {
   outline: 1px solid #777777;
 }
-input.tab-panel-region-oper {
-  margin: 0px 3px 0px 3px;
+.tab-panel-region-oper {
+  margin: 0 3px 0 3px;
 }
 .map-cursor-pointer {
   cursor: default;

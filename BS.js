@@ -116,6 +116,7 @@ App.MapObject.extend(App.BS, {
           L.DomUtil.removeClass($(this)[0], 'panel-item-active');
         });
       },this);
+
     }
     return this;
   },

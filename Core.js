@@ -269,6 +269,45 @@ App.extend(App.Core, {
       initial: true
     });
   },
+  onClickAddress: function(item, e){
+//    if (this.panel.current_button !== 1) return;
+    noty({
+      text: '<div style="margin-bottom: 10px;">Вы действительно хотите построить БС вместо адреса?</div><div style="text-align: left;">Адрес: <b>"' + item.options.title + '"</b></div>',
+      type: 'confirm',
+      timeout: false,
+      layout: 'centerWide',
+      theme: 'bsmap',
+      modal: true,
+      callback: {
+        onShow: function(){
+          console.log('onShow');
+          console.log($('ul#noty_center_layout_container'));
+//          $('ul#noty_center_layout_container').width('100%');
+        },
+        afterShow: function(){
+          console.log('onShow');
+          console.log($('ul#noty_center_layout_container'));
+        }
+      },
+      buttons: [
+        {
+          addClass: 'btn btn-primary',
+          text: 'Построить',
+          onClick: (function(self){
+            return function($noty) {
+              $noty.close();
+            };
+          })(this)
+        },{
+          addClass: 'btn btn-danger',
+          text: 'Отмена',
+          onClick: function($noty) {
+            $noty.close();
+          }
+        }
+      ]
+    });
+  },
   autocompleteChange: function(){
     var place = this.autocomplete.getPlace();
     if (!place.geometry || !place.geometry.location) {
@@ -288,7 +327,7 @@ App.extend(App.Core, {
       ].join(', '));
     }
 
-    this.collection.address.new({
+    var item = this.collection.address.new({
       location: L.latLng([place.geometry.location.lat(),place.geometry.location.lng()]),
       title: address,
       initial: true

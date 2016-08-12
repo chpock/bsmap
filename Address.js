@@ -43,6 +43,11 @@ App.MapObject.extend(App.Address, {
         delete this.initial;
       }
 
+      this.marker.on('click', function(e){
+        this.cancelExecFunc('buildbs');
+        this.core.onClickAddress(this, e);
+      }, this);
+
       this.marker.on('mouseover',function(){
         L.DomUtil.addClass($('#tbl_address .panel-item')[this.collection.indexOf(this)], 'panel-item-active');
       }, this);

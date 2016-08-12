@@ -140,6 +140,7 @@ App.MapObject.extend(App.Region, {
             L.DomUtil.removeClass($(this)[0], 'panel-item-active');
           });
         },this);
+
       }
     }
     return this;

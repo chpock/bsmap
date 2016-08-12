@@ -78,7 +78,9 @@ L.Control.Panel = L.Control.extend({
     this.inputs[1] = L.DomUtil.create('div', 'tab-panel-inputbar-container');
     line = L.DomUtil.create('div', 'tab-panel-inputbar', this.inputs[1]);
     L.DomUtil.create('span', 'tab-panel-label', line).innerHTML = "Азимут:";
-    L.DomUtil.create('input', 'tab-panel-input-azimut', line).value = '0';
+    el = L.DomUtil.create('input', 'tab-panel-input-azimut', line);
+    el.value = '0';
+    $(el).focus(function(){$(this).select();}).mouseup(function(e){e.preventDefault();});
     el = L.DomUtil.create('span', 'tab-panel-label', line);
     el.style.marginLeft = '10px';
     el.innerHTML = "Цвет сектора:";
@@ -104,6 +106,7 @@ L.Control.Panel = L.Control.extend({
       $('span.tab-panel-region-btn').removeClass('tab-panel-region-btn-active');
       $('span.tab-panel-region-btn').eq(0).addClass('tab-panel-region-btn-active');
       $('input.tab-panel-region-oper').eq(0).prop("checked", true);
+      $('.tab-panel-input-lac').focus();
     }, this);
 
     span = L.DomUtil.create('span', 'tab-panel-region-btn', line);
@@ -117,6 +120,7 @@ L.Control.Panel = L.Control.extend({
       $('span.tab-panel-region-btn').removeClass('tab-panel-region-btn-active');
       $('span.tab-panel-region-btn').eq(1).addClass('tab-panel-region-btn-active');
       $('input.tab-panel-region-oper').eq(1).prop("checked", true);
+      $('.tab-panel-input-lac').focus();
     }, this);
 
     span = L.DomUtil.create('span', 'tab-panel-region-btn', line);
@@ -130,16 +134,27 @@ L.Control.Panel = L.Control.extend({
       $('span.tab-panel-region-btn').removeClass('tab-panel-region-btn-active');
       $('span.tab-panel-region-btn').eq(2).addClass('tab-panel-region-btn-active');
       $('input.tab-panel-region-oper').eq(2).prop("checked", true);
+      $('.tab-panel-input-lac').focus();
     }, this);
 
     el = L.DomUtil.create('span', 'tab-panel-label', line);
     el.style.marginLeft = '10px';
     el.innerHTML = "LAC:";
-    L.DomUtil.create('input', 'tab-panel-input-lac', line).value = '0';
+    el = L.DomUtil.create('input', 'tab-panel-input-lac', line);
+    el.value = '0';
+    $(el)
+      .focus(function(){$(this).select();})
+      .mouseup(function(e){e.preventDefault();})
+      .keyup(function(e){if (e.keyCode === 13) $('.tab-panel-button-lookup-region').click();});
     el = L.DomUtil.create('span', 'tab-panel-label', line);
     el.style.marginLeft = '5px';
     el.innerHTML = "CID:";
-    L.DomUtil.create('input', 'tab-panel-input-cid', line).value = '0';
+    el = L.DomUtil.create('input', 'tab-panel-input-cid', line);
+    el.value = '0';
+    $(el)
+      .focus(function(){$(this).select();})
+      .mouseup(function(e){e.preventDefault();})
+      .keyup(function(e){if (e.keyCode === 13) $('.tab-panel-button-lookup-region').click();});
     el = L.DomUtil.create('span', 'tab-panel-button tab-panel-button-lookup-region', line);
     el.style.perspective =  '780px';
     el.style.margin = '0px 0px 0px 10px';

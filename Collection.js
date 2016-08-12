@@ -119,7 +119,7 @@ App.extend(App.Collection, {
       var el, i, line, icon, func;
       while(this.options.sidebar.lastChild) this.options.sidebar.removeChild(this.options.sidebar.lastChild);
       for (i = 0; i < this.objects.length; i++) {
-        line = L.DomUtil.create('tr', this.deleted[i] ? 'panel-item-deleted' : 'panel-item', this.options.sidebar);
+        line = L.DomUtil.create('tr', this.deleted[i] ? 'panel-item deleted' : 'panel-item', this.options.sidebar);
         el = L.DomUtil.create('td','panel-column', line);
         el.style.width = '1.5em';
         el.innerHTML = i+1 + '.';

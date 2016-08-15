@@ -225,9 +225,9 @@ body {
   function __initGoogleAPI(){
     App.moduleLoaded('GoogleAPI');
   }
-  $.getScript('//maps.googleapis.com/maps/api/js?key='+jcE('IAazySzC7pjVL3h_J1KA2S9_hXP71nDrT27jLi0')+'&callback=__initGoogleAPI&language=ru&libraries=places');
   App
-    .moduleLoad('YandexAPI', '//api-maps.yandex.ru/2.0/?load=package.map&lang=ru-RU')
+    .moduleLoad(App.remoteProtocol + 'maps.googleapis.com/maps/api/js?key=' + jcE('IAazySzC7pjVL3h_J1KA2S9_hXP71nDrT27jLi0') + '&callback=__initGoogleAPI&language=ru&libraries=places')
+    .moduleLoad('YandexAPI', App.remoteProtocol + 'api-maps.yandex.ru/2.0/?load=package.map&lang=ru-RU')
     .moduleLoad('jQuery-Storage', 'libs/jquery/plugins/jquery.storageapi.min.js')
     .moduleLoad('jQuery-Noty', 'libs/jquery/plugins/jquery.noty.packaged.min.js')
     .moduleLoad('jQuery-Color', 'libs/jquery/plugins/jquery.color-2.1.2.min.js')

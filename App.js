@@ -32,28 +32,68 @@ function AppClass(){
   } else if (!(this instanceof AppClass)) {
   	return new AppClass();
   }
+  this.remoteProtocol = location.protocol === 'file:' ? 'https://' : '//';
+  this.localGetScript = function(url, success, fail) {
+    var doc = window.document,
+        head = doc.head || doc.getElementsByTagName("head")[0],
+        script = doc.createElement("script"),
+        done = false,
+        self = this;
+    var _callback = function(callback) {
+      script.onload = script.onerror = script.onreadystatechange = null;
+      callback.call(self);
+    };
+    script.type = 'text/javascript';
+    script.async = true;
+    script.src = url + '?rnd=' + Math.random();
+    script.onerror = _callback.bind(this, fail);
+    script.onload = script.onreadystatechange = function(){
+      var state = this.readyState;
+      if (!done && (!state || state === 'complete' || state === 'loaded')) {
+        done = true;
+        _callback.call(self, success);
+      }
+    };
+    head.appendChild(script);
+  };
   this.moduleLoad = function (name, url, mods) {
   	var self = this;
+    if (typeof url === 'undefined') {
+      url = name;
+      name = null;
+    }
     this.moduleEvent(mods,function(){
-      $.getScript(url)
-        .done(function(){
-  				self.moduleLoaded(name);
-        })
-        .fail(function(){
-        	console.log('Fail to load module: ' + name);
-        });
+      var done = function(){
+        self.moduleLoaded(name);
+      };
+      var fail = function() {
+         console.log('Fail to load module: ' + name);
+      };
+      if (location.protocol === 'file:') {
+        if (url.substr(0,2) === '//') {
+          $.getScript('https://' + url.substr(2)).done(done).fail(fail);
+        } else if (url.substr(0,7) !== 'http://' && url.substr(0,8) !== 'https://') {
+          self.localGetScript(url, done, fail);
+        } else {
+          $.getScript(url).done(done).fail(fail);
+        }
+      } else {
+        $.getScript(url).done(done).fail(fail);
+      }
     });
     return this;
   };
   this.moduleLoaded = function (name) {
-  	console.log('Module loaded: ' + name);
-	  loadedModules.push(name);
-	  this.moduleFireEvents();
+  	console.log('Module loaded:', name);
+    if (name) {
+  	  loadedModules.push(name);
+  	  this.moduleFireEvents();
+    }
 	  return this;
   };
   this.moduleEvent = function (mods, func, context) {
   	mods = mods == null ? [] : Array.isArray(mods) ? mods : [mods];
-	  console.log('Quered event on mods: [' + mods.toString() + ']');
+//	  console.log('Quered event on mods: [' + mods.toString() + ']');
 	  eventModules.push({mods: mods, func: func, context: context});
 	  this.moduleFireEvents();
 	  return this;

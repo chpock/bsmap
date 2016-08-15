@@ -29,7 +29,7 @@ App.Core = function (){
 
   this.layers = {
     'Яндекс': new L.Yandex(),
-    'Visicom': new L.TileLayer('//tms{s}.visicom.ua/2.0.0/planet3/base_ru/{z}/{x}/{y}.png',{
+    'Visicom': new L.TileLayer(this.remoteProtocol + 'tms{s}.visicom.ua/2.0.0/planet3/base_ru/{z}/{x}/{y}.png',{
       maxZoom: 19,
       tms: true,
       attribution: 'Данные компании © <a href="http://visicom.ua/">Визиком</a>',
@@ -223,7 +223,8 @@ App.extend(App.Core, {
 
     this.geocoder = new google.maps.Geocoder();
 
-    $.getScript("libs/leaflet/plugins/layer/tile/Google.js", function(){
+    this.moduleLoad('Leaflet-Google', 'libs/leaflet/plugins/layer/tile/Google.js');
+    this.moduleEvent('Leaflet-Google', function(){
       self.map_control_layers.addBaseLayer(new L.Google('ROADMAP'), 'Google');
     });
   },

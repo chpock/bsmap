@@ -249,7 +249,7 @@ App.extend(App.Core, {
   },
   buildBS: function(ev) {
     if (this.panel.current_button !== 1) return;
-    var azimut = parseInt($('.tab-panel-input-azimut').val(),10);
+    var azimut = parseInt(this.panel.input_value_azimut,10);
     if (isNaN(azimut) || azimut < 0 || azimut > 360) {
       noty({
         text: 'Невозможно построить БС: некорректное значение азимута. Значение азимута должно быть от 0° до 360°.',
@@ -272,8 +272,13 @@ App.extend(App.Core, {
   },
   onClickAddress: function(item, e){
 //    if (this.panel.current_button !== 1) return;
+    var text, self = this;
+    text  = '<div style="margin-bottom: 10px;">Вы действительно хотите построить БС вместо адреса?</div>';
+    text += '<div style="margin: 5px 0px;text-align: left;text-overflow: ellipsis;overflow: hidden;white-space: nowrap">Адрес: <b>"' + this.escapeHTML(item.options.title) + '"</b></div>';
+    text += '<div style="margin: 5px 0px;text-align: left">Азимут: <input class="tab-panel-input-azimut"></input></div>';
+    text += '<div style="margin: 5px 0px;text-align: left">Цвет сектора:</div>';
     noty({
-      text: '<div style="margin-bottom: 10px;">Вы действительно хотите построить БС вместо адреса?</div><div style="text-align: left;">Адрес: <b>"' + item.options.title + '"</b></div>',
+      text: text,
       type: 'confirm',
       timeout: false,
       layout: 'centerWide',
@@ -281,13 +286,7 @@ App.extend(App.Core, {
       modal: true,
       callback: {
         onShow: function(){
-          console.log('onShow');
-          console.log($('ul#noty_center_layout_container'));
-//          $('ul#noty_center_layout_container').width('100%');
-        },
-        afterShow: function(){
-          console.log('onShow');
-          console.log($('ul#noty_center_layout_container'));
+          $('ul#noty_center_wide_layout_container .tab-panel-input-azimut').val(self.panel.input_value_azimut);
         }
       },
       buttons: [

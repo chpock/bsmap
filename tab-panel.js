@@ -149,7 +149,10 @@ L.Control.Panel = L.Control.extend({
     line = L.DomUtil.create('div', 'tab-panel-inputbar', this.inputs[1]);
     L.DomUtil.create('span', 'tab-panel-label', line).innerHTML = "Азимут:";
     el = L.DomUtil.create('input', 'tab-panel-input-azimut', line);
-    el.value = '0';
+    L.DomEvent.addListener(el, 'input', function(ev){
+      this.input_value_azimut = ev.target.value;
+    }, this);
+    el.value = this.input_value_azimut = '0';
     $(el).focus(function(){$(this).select();}).mouseup(function(e){e.preventDefault();});
     el = L.DomUtil.create('span', 'tab-panel-label', line);
     el.style.marginLeft = '10px';

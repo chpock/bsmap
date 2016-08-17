@@ -265,7 +265,7 @@ App.extend(App.Core, {
       location: ev.latlng,
       azimut: azimut,
       title: null,
-      color: this.panel.colorPickerBSGet(),
+      color: this.panel.colorpicker_bs.getColor(),
       size: 500,
       initial: true
     });
@@ -395,7 +395,7 @@ App.extend(App.Core, {
         if (loc) {
           this.map.flyTo([loc.lat,loc.lng]);
           req.obj = this.collection.region.new({
-            color: this.panel.colorPickerRegionGet(),
+            color: this.panel.colorpicker_region.getColor(),
             lac: lac,
             cid: cid,
             mnc: mnc,

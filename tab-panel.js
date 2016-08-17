@@ -22,6 +22,76 @@
 /*globals App,L,$ */
 "use strict";
 
+L.ColorPicker = L.Evented.extend({
+  options: {
+    colors: ['#777777', '#000000', '#ff00ff', '#ff0000', '#9000ff', '#ff6c00',
+             '#ffff00', '#00ff00', '#00aa00', '#00ffdd', '#0000ff'],
+    defaultColor: '#000000'
+  },
+
+  initialize: function (options) {
+    var i, el;
+    L.setOptions(this, options);
+    this._container = L.DomUtil.create('div', '');
+    this._container.style.display = 'inline-block';
+    for (i = 0; i < this.options.colors.length; i += 1) {
+      el = L.DomUtil.create('div', '', this._container);
+      el.style.display = 'inline-block';
+      el.style.backgroundColor = this.options.colors[i];
+      el.style.width = '16px';
+      el.style.height = '16px';
+      el.style.float = 'left';
+      el.style.border = '1px solid #000000';
+      el.style.margin = '2px 2px 2px 2px';
+      L.DomEvent.addListener(el, 'click', this._colorSelected, this);
+    }
+  },
+
+  addTo: function (el) {
+     el.appendChild(this._container);
+     return this;
+  },
+
+  setColor: function(color) {
+    var el, i;
+    // normalize color value
+    el = L.DomUtil.create('div', '');
+    el.style.backgroundColor = color;
+    color = el.style.backgroundColor;
+    el.remove();
+    for (i = this._container.children.length - 1; i >= 0; i--)
+      this._container.children[i].style.outline =
+        this._container.children[i].style.backgroundColor === color ? '2px solid #000000' : '';
+    return this;
+  },
+
+  getColor: function() {
+    for (var i = this._container.children.length - 1; i >= 0; i--)
+      if (this._container.children[i].style.outline !== '') return this._container.children[i].style.backgroundColor;
+    return this.options.detaultColor;
+  },
+
+  _colorSelected: function (ev) {
+    ev.selectedColor = this.options.defaultColor;
+    for (var i = this._container.children.length - 1; i >= 0; i--) {
+      if (ev.toElement === this._container.children[i]) {
+        this._container.children[i].style.outline = '2px solid #000000';
+        ev.selectedColor = this._container.children[i].style.backgroundColor;
+      } else {
+        this._container.children[i].style.outline = '';
+      }
+    }
+    L.DomEvent.stop(ev);
+    this.fire('selected', ev);
+  }
+
+});
+
+L.colorPicker = function (options) {
+  return new L.ColorPicker(options);
+};
+
+
 L.Control.Panel = L.Control.extend({
   options: {
     position: 'topleft',
@@ -84,8 +154,7 @@ L.Control.Panel = L.Control.extend({
     el = L.DomUtil.create('span', 'tab-panel-label', line);
     el.style.marginLeft = '10px';
     el.innerHTML = "Цвет сектора:";
-    this.colorpicker_bs = this.colorPickerSet('#0000ff', this.colorPicker());
-    line.appendChild(this.colorpicker_bs);
+    this.colorpicker_bs = L.colorPicker().setColor('#0000ff').addTo(line);
     L.DomUtil.create('div', 'tab-panel-inputbar-separator', this.inputs[1]);
     line = L.DomUtil.create('div', 'tab-panel-inputbar-help', this.inputs[1]);
     line.innerHTML = 'Для того, что бы <b>построить</b> БС - введите требуемый азимут, выберите цвет и кликните левой клавишей мышки на карте в месте ее расположения. Для <b>перемещения</b> построенной БС - перетащите маркер.';
@@ -169,8 +238,7 @@ L.Control.Panel = L.Control.extend({
     line = L.DomUtil.create('div', 'tab-panel-inputbar', this.inputs[2]);
     line.style.margin = '4px 0px 0px 0px';
     L.DomUtil.create('span', 'tab-panel-label', line).innerHTML = "Цвет региона:";
-    this.colorpicker_region = this.colorPickerSet('#ff0000', this.colorPicker());
-    line.appendChild(this.colorpicker_region);
+    this.colorpicker_region = L.colorPicker().setColor('#ff0000').addTo(line);
 
     L.DomUtil.create('div', 'tab-panel-inputbar-separator', this.inputs[2]);
     line = L.DomUtil.create('div', 'tab-panel-inputbar-help', this.inputs[2]);
@@ -214,59 +282,6 @@ L.Control.Panel = L.Control.extend({
     var el = $('.tab-panel-button-lookup-region')[0];
     el.innerHTML = 'Начать поиск';
     if (focus) focus.focus();
-  },
-
-  colorPicker: function(callback) {
-    var self = this;
-    if (!callback) callback = function(){};
-    var colors = ['#777777','#000000','#ff00ff', '#ff0000','#9000ff','#ff6c00','#ffff00','#00ff00','#00aa00','#00ffdd','#0000ff'];
-    var container = document.createElement('div');
-    container.style.display = 'inline-block';
-    colors.forEach(function(color){
-      var el = document.createElement('div');
-      el.style.display = 'inline-block';
-      el.style.backgroundColor = color;
-      el.style.width = '16px';
-      el.style.height = '16px';
-      el.style.float = 'left';
-      el.style.border = '1px solid #000000';
-      el.style.margin = '2px 2px 2px 2px';
-      $(el).click(function(){
-        for (var i = 0; i < container.children.length; i++) container.children[i].style.outline = '';
-        el.style.outline = '2px solid #000000';
-        callback.call(self,color);
-      });
-      container.appendChild(el);
-    });
-    return container;
-  },
-
-  colorPickerSet: function(color, cp) {
-    var el = document.createElement('div');
-    el.style.backgroundColor = color;
-    color = el.style.backgroundColor;
-    el.remove();
-    for (var i = 0; i < cp.children.length; i++) if (cp.children[i].style.backgroundColor === color) break;
-    if (i === cp.children.length) return cp;
-    for (var j = 0; j < cp.children.length; j++) cp.children[j].style.outline = i === j ? '2px solid #000000' : '';
-    return cp;
-  },
-
-  colorPickerGet: function(cp) {
-    for (var i = 0; i < cp.children.length; i++) if (cp.children[i].style.outline !== '') return cp.children[i].style.backgroundColor;
-    return '#000000';
-  },
-
-  colorPickerBSGet: function() {
-    return this.colorPickerGet(this.colorpicker_bs);
-  },
-  colorPickerBSSet: function(color) {
-    return this.colorPickerSet(color, this.colorpicker_bs);
-  },
-  colorPickerRegionGet: function() {
-    return this.colorPickerGet(this.colorpicker_region);
-  },
-  colorPickerRegionSet: function(color) {
-    return this.colorPickerSet(color, this.colorpicker_region);
   }
+
 });

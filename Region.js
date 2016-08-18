@@ -78,6 +78,7 @@ App.MapObject.extend(App.Region, {
             shadowSize:  [41, 41]
         });
         this[locs[i].marker_var] = L.marker(locs[i].location, {
+          zIndexOffset: 500,
           clickable: true,
           keyboard: false,
           title: '',

@@ -74,7 +74,7 @@ L.ColorPicker = L.Evented.extend({
   _colorSelected: function (ev) {
     ev.selectedColor = this.options.defaultColor;
     for (var i = this._container.children.length - 1; i >= 0; i--) {
-      if (ev.toElement === this._container.children[i]) {
+      if (ev.target === this._container.children[i]) {
         this._container.children[i].style.outline = '2px solid #000000';
         ev.selectedColor = this._container.children[i].style.backgroundColor;
       } else {

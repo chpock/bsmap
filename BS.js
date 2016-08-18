@@ -41,6 +41,7 @@ App.MapObject.extend(App.BS, {
   addToMap: function () {
     if(this.map() && this.options.location) {
       this.marker = L.marker(this.options.location, {
+        zIndexOffset: 750,
         clickable: true,
         keyboard: false,
         draggable: true,

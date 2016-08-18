@@ -79,7 +79,7 @@ App.Core = function (){
       zoomend: this.autocompleteBound,
       zoomlevelschange: this.autocompleteBound,
       resize: this.autocompleteBound,
-      click: this.delayExecFunc('buildbs', this.buildBS, 250, this),
+      click: this.delayExecFunc('buildbs', this.buildBS_onClick, 250, this),
       dblclick: this.cancelExecFunc('buildbs')
     }, this)
     .addLayer(this.layers['Visicom'])
@@ -208,8 +208,6 @@ App.Core = function (){
 
 };
 
-
-
 App.extend(App.Core, {
   initGoogle: function(){
     var self = this;
@@ -242,15 +240,18 @@ App.extend(App.Core, {
       new google.maps.LatLng(bounds['_northEast']['lat'],bounds['_northEast']['lng'])
     ));
   },
-  resizeBS: function(bs, inc) {
-    bs.size = bs.size + inc;
-    this.map.removeLayer(bs.polygon);
-    bs.polygon = this.add_bs_polygon(bs.location, bs.azimut, bs.size, bs.color);
-  },
-  buildBS: function(ev) {
+  buildBS_onClick: function (ev) {
     if (this.panel.current_button !== 1) return;
-    var azimut = parseInt(this.panel.input_value_azimut,10);
-    if (isNaN(azimut) || azimut < 0 || azimut > 360) {
+    var azimuth = this.buildBS_checkAzimuth(this.panel.input_value_azimut);
+    if (azimuth === -1) {
+      $('.tab-panel .tab-panel-input-azimut').focus();
+      return;
+    }
+    this.buildBS(ev.latlng, azimuth, this.panel.colorpicker_bs.getColor());
+  },
+  buildBS_checkAzimuth: function (value) {
+    value = parseInt(value,10);
+    if (isNaN(value) || value < 0 || value > 360) {
       noty({
         text: 'Невозможно построить БС: некорректное значение азимута. Значение азимута должно быть от 0° до 360°.',
         type: 'error',
@@ -258,25 +259,28 @@ App.extend(App.Core, {
         layout: 'bottom',
         theme: 'bsmap'
       });
-      $('.tab-panel-input-azimut').focus();
-      return;
+      value = -1;
     }
+    return value;
+  },
+  buildBS: function(location, azimuth, color) {
     this.collection.bs.new({
-      location: ev.latlng,
-      azimut: azimut,
+      location: location,
+      azimut: azimuth,
       title: null,
-      color: this.panel.colorpicker_bs.getColor(),
+      color: color,
       size: 500,
       initial: true
     });
   },
   onClickAddress: function(item, e){
-//    if (this.panel.current_button !== 1) return;
-    var text, self = this;
-    text  = '<div style="margin-bottom: 10px;">Вы действительно хотите построить БС вместо адреса?</div>';
-    text += '<div style="margin: 5px 0px;text-align: left;text-overflow: ellipsis;overflow: hidden;white-space: nowrap">Адрес: <b>"' + this.escapeHTML(item.options.title) + '"</b></div>';
-    text += '<div style="margin: 5px 0px;text-align: left">Азимут: <input class="tab-panel-input-azimut"></input></div>';
-    text += '<div style="margin: 5px 0px;text-align: left">Цвет сектора:</div>';
+    if (this.panel.current_button !== 1) return;
+    var text, self = this, colorpicker;
+    text  = '<div style="margin-bottom: 13px;">Вы действительно хотите построить БС на месте адреса?</div>';
+    text += '<div style="height: 23px;padding: 5px 0px;text-align: left;text-overflow: ellipsis;overflow: hidden;white-space: nowrap">Адрес: <b>' + this.escapeHTML(item.options.title) + '</b></div>';
+    text += '<div style="height: 23px;padding: 5px 0px;text-align: left">Азимут: <input class="tab-panel-input-azimut"></div>';
+    text += '<div style="height: 23px;padding: 5px 0px;text-align: left;display:flex;align-items:center">Цвет сектора:</div>';
+    text += '<div style="height: 23px;padding: 5px 0px;text-align: left;display:flex;align-items:center"><input type="checkbox" checked>Удалить маркер адреса</div>';
     noty({
       text: text,
       type: 'confirm',
@@ -287,17 +291,31 @@ App.extend(App.Core, {
       callback: {
         onShow: function(){
           $('ul#noty_center_wide_layout_container .tab-panel-input-azimut').val(self.panel.input_value_azimut);
+          $('ul#noty_center_wide_layout_container .tab-panel-input-azimut').focus(function(){$(this).select();}).mouseup(function(e){e.preventDefault();});
+          colorpicker = L.colorPicker()
+            .addTo($('ul#noty_center_wide_layout_container div:eq(5)')[0])
+            .setColor(self.panel.colorpicker_bs.getColor())
+            .on('selected', function(){
+              self.panel.colorpicker_bs.setColor(colorpicker.getColor());
+            });
         }
       },
       buttons: [
         {
           addClass: 'btn btn-primary',
           text: 'Построить',
-          onClick: (function(self){
-            return function($noty) {
-              $noty.close();
-            };
-          })(this)
+          onClick: function($noty) {
+            var azimuth = self.buildBS_checkAzimuth($('ul#noty_center_wide_layout_container .tab-panel-input-azimut').val());
+            if (azimuth === -1) {
+              $('ul#noty_center_wide_layout_container .tab-panel-input-azimut').focus();
+              return;
+            }
+            self.buildBS(item.options.location, azimuth, colorpicker.getColor());
+            if ($('ul#noty_center_wide_layout_container input:checkbox').prop('checked')) {
+              self.collection.address.delete(item);
+            }
+            $noty.close();
+          }
         },{
           addClass: 'btn btn-danger',
           text: 'Отмена',

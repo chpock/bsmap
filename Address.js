@@ -33,6 +33,7 @@ App.MapObject.extend(App.Address, {
   addToMap: function () {
     if(this.map() && this.options.location) {
       this.marker = L.marker(this.options.location, {
+        zIndexOffset: 1000,
         clickable: true,
         keyboard: false,
         title: this.options.title

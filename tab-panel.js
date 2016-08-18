@@ -103,12 +103,32 @@ L.Control.Panel = L.Control.extend({
   },
 
   onAdd: function () {
-    var line, el, span;
+    var line, el, span, container;
     this.buttons = [];
     this.inputs = [];
     this.current_button = 0;
 
-    var container = this._container = L.DomUtil.create('div', 'tab-panel');
+    container = this._container = L.DomUtil.create('div', 'tab-panel');
+
+    el = L.DomUtil.create('div', 'tab-panel-min-button', container);
+    el.innerHTML = 'X';
+    L.DomEvent.addListener(el, 'click', function(ev){
+      L.DomEvent.stop(ev);
+      var button = $('.tab-panel .tab-panel-min-button')[0];
+      if (this._body.style.display === 'none') {
+        this._container.style.width = '';
+        this._container.style.height = '';
+        this._body.style.display = '';
+        button.innerHTML = 'X';
+      } else {
+        this._body.style.display = 'none';
+        this._container.style.width = button.offsetWidth + 'px';
+        this._container.style.height = button.offsetHeight + 'px';
+        button.innerHTML = '&rArr;';
+      }
+    }, this);
+
+    container = this._body = L.DomUtil.create('div', '', container);
 
     var buttonbar = L.DomUtil.create('div', 'tab-panel-buttonbar', container);
 
@@ -119,17 +139,17 @@ L.Control.Panel = L.Control.extend({
     this.buttons[2] = L.DomUtil.create('span', 'tab-panel-button', buttonbar);
     this.buttons[2].innerHTML = 'Область работы БС';
     L.DomEvent.addListener(this.buttons[0], 'click', function(ev){
-      L.DomEvent.stopPropagation(ev);
+      L.DomEvent.stop(ev);
       this._selectPanel(0);
       $('.leaflet-container').removeClass('map-cursor-pointer');
     }, this);
     L.DomEvent.addListener(this.buttons[1], 'click', function(ev){
-      L.DomEvent.stopPropagation(ev);
+      L.DomEvent.stop(ev);
       this._selectPanel(1);
       $('.leaflet-container').addClass('map-cursor-pointer');
     }, this);
     L.DomEvent.addListener(this.buttons[2], 'click', function(ev){
-      L.DomEvent.stopPropagation(ev);
+      L.DomEvent.stop(ev);
       this._selectPanel(2);
       $('.leaflet-container').removeClass('map-cursor-pointer');
     }, this);
@@ -174,7 +194,7 @@ L.Control.Panel = L.Control.extend({
     el.checked = 1;
     L.DomUtil.create('img', '', span).src = 'images/255-3.png';
     L.DomEvent.addListener(span, 'click', function(ev){
-      L.DomEvent.stopPropagation(ev);
+      L.DomEvent.stop(ev);
       $('span.tab-panel-region-btn').removeClass('tab-panel-region-btn-active');
       $('span.tab-panel-region-btn').eq(0).addClass('tab-panel-region-btn-active');
       $('input.tab-panel-region-oper').eq(0).prop("checked", true);
@@ -188,7 +208,7 @@ L.Control.Panel = L.Control.extend({
     el.value = '1';
     L.DomUtil.create('img', '', span).src = 'images/255-1.png';
     L.DomEvent.addListener(span, 'click', function(ev){
-      L.DomEvent.stopPropagation(ev);
+      L.DomEvent.stop(ev);
       $('span.tab-panel-region-btn').removeClass('tab-panel-region-btn-active');
       $('span.tab-panel-region-btn').eq(1).addClass('tab-panel-region-btn-active');
       $('input.tab-panel-region-oper').eq(1).prop("checked", true);
@@ -202,7 +222,7 @@ L.Control.Panel = L.Control.extend({
     el.value = '6';
     L.DomUtil.create('img', '', span).src = 'images/255-6.png';
     L.DomEvent.addListener(span, 'click', function(ev){
-      L.DomEvent.stopPropagation(ev);
+      L.DomEvent.stop(ev);
       $('span.tab-panel-region-btn').removeClass('tab-panel-region-btn-active');
       $('span.tab-panel-region-btn').eq(2).addClass('tab-panel-region-btn-active');
       $('input.tab-panel-region-oper').eq(2).prop("checked", true);
@@ -234,7 +254,7 @@ L.Control.Panel = L.Control.extend({
     el.style.height = '15px';
     el.innerHTML = 'Начать поиск';
     L.DomEvent.addListener(el, 'click', function(ev){
-      L.DomEvent.stopPropagation(ev);
+      L.DomEvent.stop(ev);
       this._lookupRegion();
     }, this);
 
@@ -249,14 +269,14 @@ L.Control.Panel = L.Control.extend({
 
     L.DomEvent.disableClickPropagation(container);
 
-    return container;
+    return this._container;
   },
 
   _selectPanel: function(bid) {
     L.DomUtil.removeClass(this.buttons[this.current_button], 'tab-panel-button-active');
-    this._container.removeChild(this.inputs[this.current_button]);
+    this._body.removeChild(this.inputs[this.current_button]);
     L.DomUtil.addClass(this.buttons[bid], 'tab-panel-button-active');
-    this._container.appendChild(this.inputs[bid]);
+    this._body.appendChild(this.inputs[bid]);
     this.current_button = bid;
   },
 

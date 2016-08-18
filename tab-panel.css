@@ -9,6 +9,39 @@
 
   box-shadow: 3px 3px 5px rgba(0,0,0,0.5);
 }
+.tab-panel-min-button {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  border-radius: 7px;
+  border: 1px solid #999999;
+
+  width: 16px;
+  height: 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  cursor: pointer;
+  padding: 1px;
+
+  font-size: 12px;
+}
+.tab-panel-min-button:hover {
+  border: 2px solid #000000;
+  padding: 0;
+  font-weight: bold;
+}
 .tab-panel-buttonbar {
   padding: 5px;
 }

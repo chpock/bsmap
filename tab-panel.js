@@ -180,7 +180,7 @@ L.Control.Panel = L.Control.extend({
     this.colorpicker_bs = L.colorPicker().setColor('#0000ff').addTo(line);
     L.DomUtil.create('div', 'tab-panel-inputbar-separator', this.inputs[1]);
     line = L.DomUtil.create('div', 'tab-panel-inputbar-help', this.inputs[1]);
-    line.innerHTML = 'Для того, что бы <b>построить</b> БС - введите требуемый азимут, выберите цвет и кликните левой клавишей мышки на карте в месте ее расположения. Для <b>перемещения</b> построенной БС - перетащите маркер.';
+    line.innerHTML = 'Для того, что бы <b>построить</b> БС - введите требуемый азимут, выберите цвет и кликните левой клавишей мышки на карте в месте ее расположения либо на маркер адреса. Для <b>перемещения</b> сектора БС - перетащите маркер.';
 
     this.inputs[2] = L.DomUtil.create('div', 'tab-panel-inputbar-container');
     line = L.DomUtil.create('div', 'tab-panel-inputbar', this.inputs[2]);
@@ -267,7 +267,7 @@ L.Control.Panel = L.Control.extend({
     line = L.DomUtil.create('div', 'tab-panel-inputbar-help', this.inputs[2]);
     line.innerHTML = 'Для того, что бы <b>построить</b> примерную область работы БС - выберите оператора, LAC и CellID базовой станции, цвет области и нажмите кнопку <b>\"Начать поиск\"</b>.';
 
-    L.DomEvent.disableClickPropagation(container);
+    L.DomEvent.disableClickPropagation(this._container);
 
     return this._container;
   },

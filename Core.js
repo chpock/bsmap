@@ -204,27 +204,74 @@ App.Core = function (){
     $('#save-dialog-button-cancel').click();
   }, this);
 
-  this.App.moduleEvent('GoogleAPI', this.initGoogle, this);
-
+  this.moduleEvent('Leaflet-Google', this.initGoogle, this);
 };
 
 App.extend(App.Core, {
   initGoogle: function(){
     var self = this;
-    console.log('initGoogle in map...');
+
+    this.map_control_layers.addBaseLayer(new L.Google('ROADMAP'), 'Google');
+
+    this.map.getBoundsGoogle = function () {
+       var bounds = this.getBounds();
+       return new google.maps.LatLngBounds(
+        new google.maps.LatLng(bounds['_southWest']['lat'],bounds['_southWest']['lng']),
+        new google.maps.LatLng(bounds['_northEast']['lat'],bounds['_northEast']['lng'])
+      );
+    };
+
     this.autocomplete = new google.maps.places.Autocomplete(this.panel.input_address, {
       types: ['geocode'],
       componentRestrictions: {country: 'ua'}
     });
-    google.maps.event.addListener(this.autocomplete, 'place_changed', function(){ self.autocompleteChange.call(self); });
-    this.autocompleteBound();
+    this.autocomplete.setBounds(this.map.getBoundsGoogle());
+
+    google.maps.event.addListener(this.autocomplete, 'place_changed', function(){
+      self.autocompleteChange.call(self);
+    });
 
     this.geocoder = new google.maps.Geocoder();
+    this.autocomplete_service = new google.maps.places.AutocompleteService();
 
-    this.moduleLoad('Leaflet-Google', 'libs/leaflet/plugins/layer/tile/Google.js');
-    this.moduleEvent('Leaflet-Google', function(){
-      self.map_control_layers.addBaseLayer(new L.Google('ROADMAP'), 'Google');
-    });
+    L.DomEvent.addListener(this.panel.input_address, 'keyup', function(ev){
+      if (ev.keyCode !== 13) return;
+      L.DomEvent.stop(ev);
+      var address = this.panel.input_address.value.trim();
+      if (address === '') return;
+      this.autocomplete.setBounds();
+        this.autocomplete_service.getPlacePredictions({
+          input: address,
+          bounds: this.autocomplete.getBounds(),
+          componentRestrictions: {
+            country: 'ua'
+          },
+          types: ['geocode']
+        }, function(result, status) {
+          if (status !== 'OK') {
+            console.log('Error while req autocompl service. Status: "' + status + '"', arguments);
+          } else if (!result.length) {
+            console.log('Error while req autocompl service. Result is empty.', arguments);
+          } else if (!result[0].place_id) {
+            console.log('Error while req autocompl service. "place_id" not found.', arguments);
+          } else {
+            self.geocoder.geocode({
+              placeId: result[0].place_id
+            }, function (result, status) {
+              if (status !== 'OK') {
+                console.log('Error while req geocode. Status: "' + status + '"', arguments);
+              } else if (!result.length) {
+                console.log('Error while req geocode. Result is empty', arguments);
+              } else if (!result[0].geometry || !result[0].geometry.location) {
+                console.log('Error while req geocode. geometry.location in place[0] not found', arguments);
+              } else {
+                L.DomUtil.removeClass(self.panel.input_address, 'address-notfound');
+                self.buildPlace(result[0]);
+              }
+            });
+          }
+        });
+    }, this);
   },
   autocompleteBound: function(){
     if (this.map) {
@@ -234,11 +281,7 @@ App.extend(App.Core, {
       });
     }
     if (!this.autocomplete) return;
-    var bounds = this.map.getBounds();
-    this.autocomplete.setBounds(new google.maps.LatLngBounds(
-      new google.maps.LatLng(bounds['_southWest']['lat'],bounds['_southWest']['lng']),
-      new google.maps.LatLng(bounds['_northEast']['lat'],bounds['_northEast']['lng'])
-    ));
+    this.autocomplete.setBounds(this.map.getBoundsGoogle());
   },
   buildBS_onClick: function (ev) {
     if (this.panel.current_button !== 1) return;
@@ -332,7 +375,10 @@ App.extend(App.Core, {
       L.DomUtil.addClass(this.panel.input_address, 'address-notfound');
       return;
     }
-
+    L.DomUtil.removeClass(this.panel.input_address, 'address-notfound');
+    this.buildPlace(place);
+  },
+  buildPlace: function(place){
     this.map.flyTo([place.geometry.location.lat(),place.geometry.location.lng()]);
     this.autocompleteBound();
 

@@ -239,6 +239,7 @@ body {
     .moduleLoad('Leaflet-Bouncing', 'libs/leaflet/plugins/leaflet.smoothmarkerbouncing.js', 'Leaflet-Core')
     .moduleLoad('TabPanel', 'tab-panel.js', 'Leaflet-Core')
     .moduleLoad('Leaflet-Yandex', 'libs/leaflet/plugins/layer/tile/Yandex.js', ['Leaflet-Core', 'YandexAPI'])
+    .moduleLoad('Leaflet-Google', 'libs/leaflet/plugins/layer/tile/Google.js', ['Leaflet-Core', 'GoogleAPI'])
     .moduleEvent(['Leaflet-Core', 'Leaflet-Bouncing', 'Leaflet-Yandex', 'TabPanel'], function(){
       L.Icon.Default.imagePath = 'libs/leaflet/images';
       App.moduleLoaded('Leaflet');

@@ -239,38 +239,37 @@ App.extend(App.Core, {
       L.DomEvent.stop(ev);
       var address = this.panel.input_address.value.trim();
       if (address === '') return;
-      this.autocomplete.setBounds();
-        this.autocomplete_service.getPlacePredictions({
-          input: address,
-          bounds: this.autocomplete.getBounds(),
-          componentRestrictions: {
-            country: 'ua'
-          },
-          types: ['geocode']
-        }, function(result, status) {
-          if (status !== 'OK') {
-            console.log('Error while req autocompl service. Status: "' + status + '"', arguments);
-          } else if (!result.length) {
-            console.log('Error while req autocompl service. Result is empty.', arguments);
-          } else if (!result[0].place_id) {
-            console.log('Error while req autocompl service. "place_id" not found.', arguments);
-          } else {
-            self.geocoder.geocode({
-              placeId: result[0].place_id
-            }, function (result, status) {
-              if (status !== 'OK') {
-                console.log('Error while req geocode. Status: "' + status + '"', arguments);
-              } else if (!result.length) {
-                console.log('Error while req geocode. Result is empty', arguments);
-              } else if (!result[0].geometry || !result[0].geometry.location) {
-                console.log('Error while req geocode. geometry.location in place[0] not found', arguments);
-              } else {
-                L.DomUtil.removeClass(self.panel.input_address, 'address-notfound');
-                self.buildPlace(result[0]);
-              }
-            });
-          }
-        });
+      this.autocomplete_service.getPlacePredictions({
+        input: address,
+        bounds: this.autocomplete.getBounds(),
+        componentRestrictions: {
+          country: 'ua'
+        },
+        types: ['geocode']
+      }, function(result, status) {
+        if (status !== 'OK') {
+          console.log('Error while req autocompl service. Status: "' + status + '"', arguments);
+        } else if (!result.length) {
+          console.log('Error while req autocompl service. Result is empty.', arguments);
+        } else if (!result[0].place_id) {
+          console.log('Error while req autocompl service. "place_id" not found.', arguments);
+        } else {
+          self.geocoder.geocode({
+            placeId: result[0].place_id
+          }, function (result, status) {
+            if (status !== 'OK') {
+              console.log('Error while req geocode. Status: "' + status + '"', arguments);
+            } else if (!result.length) {
+              console.log('Error while req geocode. Result is empty', arguments);
+            } else if (!result[0].geometry || !result[0].geometry.location) {
+              console.log('Error while req geocode. geometry.location in place[0] not found', arguments);
+            } else {
+              L.DomUtil.removeClass(self.panel.input_address, 'address-notfound');
+              self.buildPlace(result[0]);
+            }
+          });
+        }
+      });
     }, this);
   },
   autocompleteBound: function(){

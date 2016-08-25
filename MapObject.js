@@ -50,6 +50,9 @@ App.extend(App.MapObject, {
     if (this.collection) this.collection.redrawSidebar();
   },
 // child functions
+  getTitle: function () {
+     return this.escapeHTML(this.options.title);
+  },
   removeFromMap: function () {
     return this;
   },

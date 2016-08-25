@@ -209,7 +209,7 @@ App.MapObject.extend(App.Region, {
     img.style.width = '12px';
     img.style.height = '12px';
     el = L.DomUtil.create('td', 'panel-column', parent);
-    el.innerHTML = 'Lac: ' + this.escapeHTML(this.options.lac) + ' / Cellid: ' + this.escapeHTML(this.options.cid);
+    el.innerHTML = this.getTitle();
     el = L.DomUtil.create('td', '', parent);
     el.style.width = '12px';
     el = L.DomUtil.create('div', 'panel-region-source ' + (this.options.location_g ? 'panel-region-source-ok' : 'panel-region-source-error'), el);
@@ -222,6 +222,10 @@ App.MapObject.extend(App.Region, {
     el.style.width = '12px';
     el = L.DomUtil.create('div', 'panel-region-source ' + (this.options.location_m ? 'panel-region-source-ok' : 'panel-region-source-error'), el);
     el.innerHTML = 'M';
+  },
+
+  getTitle: function () {
+    return 'Lac: ' + this.escapeHTML(this.options.lac) + ' / Cellid: ' + this.escapeHTML(this.options.cid);
   },
 
   setLocation: function (key, val) {

@@ -36,8 +36,13 @@ App.MapObject.extend(App.Address, {
         zIndexOffset: 1000,
         clickable: true,
         keyboard: false,
-        title: this.options.title
+        title: this.getTitle()
       }).addTo(this.map());
+
+      this.marker.bindTooltip('Адреса: ' + this.getTitle(), {
+        permanent: true,
+        opacity: 0.7
+      });
 
       if (this.initial) {
         this.marker.bounce(1);
@@ -72,7 +77,7 @@ App.MapObject.extend(App.Address, {
 
   getPanelElement: function (parent) {
     var el = L.DomUtil.create('td', 'panel-column', parent);
-    el.innerHTML = this.escapeHTML(this.options.title);
+    el.innerHTML = this.escapeHTML(this.getTitle());
   },
 
   onClickSidebar: function() {

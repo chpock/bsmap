@@ -45,8 +45,13 @@ App.MapObject.extend(App.BS, {
         clickable: true,
         keyboard: false,
         draggable: true,
-        title: this.options.title
+        title: this.getTitle()
       }).addTo(this.map());
+
+      this.marker.bindTooltip(this.getTooltipTitle(), {
+        permanent: true,
+        opacity: 0.7
+      });
 
       if (this.initial) {
         this.marker.bounce(1);
@@ -141,8 +146,9 @@ App.MapObject.extend(App.BS, {
 
   updateBSTitle: function() {
     if (!this.core.geocoder) return;
-    var self = this;
-    this.core.geocoder.geocode({'latLng': new google.maps.LatLng(this.options.location.lat, this.options.location.lng)}, function(self){
+    this.core.geocoder.geocode({
+      'latLng': new google.maps.LatLng(this.options.location.lat, this.options.location.lng)
+    }, function(self){
       return function(results, status){
         if (status != google.maps.GeocoderStatus.OK) {
           console.log('geocode wrong status: \'' + status);
@@ -155,6 +161,8 @@ App.MapObject.extend(App.BS, {
         }
         if (address_components.length) {
           self.options.title = address_components.join(", ");
+          self.marker.setTooltipContent(self.getTooltipTitle());
+          self.marker._icon.title = self.getTitle();
           self.redrawSidebar();
         }
       };
@@ -192,15 +200,20 @@ App.MapObject.extend(App.BS, {
         }, this);
     }
     el = L.DomUtil.create('td', 'panel-column', parent);
-    if (this.options.title === '') {
-      el.innerHTML = this.escapeHTML(this.options.location.lat + ', ' + this.options.location.lng);
-    } else {
-      el.innerHTML = this.escapeHTML(this.options.title);
-    }
+    el.innerHTML = this.getTitle();
     el = L.DomUtil.create('td','panel-column', parent);
     el.style.width = '1.9em';
     el.style.textAlign = 'right';
     el.innerHTML = this.escapeHTML(this.options.azimut);
+  },
+
+  getTitle: function () {
+    return this.escapeHTML(this.options.title === '' ?
+      this.options.location.lat + ', ' + this.options.location.lng : this.options.title);
+  },
+
+  getTooltipTitle: function () {
+     return 'Адрес: ' + this.getTitle() + '<br>Азимут: ' + this.escapeHTML(this.options.azimut);
   },
 
   onClickSidebar: function() {

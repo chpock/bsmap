@@ -14,18 +14,20 @@ body {
   flex-grow: 1;
   background: #ffffff;
 
-  outline: 1px solid #000000;
-
   display: flex;
   align-items: center;
   justify-content: center;
 }
+.separator {
+  width: 2px;
+  background: #000;
+}
 .panel {
   width: 300px;
   background: #eeeeee;
-  outline: 1px solid #000000;
 
   cursor: default;
+  overflow: auto;
 }
 .panel-header {
   background: #dddddd;
@@ -44,10 +46,12 @@ body {
 
   white-space: nowrap;
 }
-.panel-table {
-  padding: 2px;
+.panel-table-container {
+  width: calc(100% - 10px);
   margin: 5px;
-  width: 290px;
+}
+.panel-table {
+  width: 100%;
   border: 0;
   font: normal 9pt "Helvetica Neue", Arial, Helvetica, sans-serif;
 
@@ -191,6 +195,20 @@ body {
 }
 </style>
 <link rel="stylesheet" href="libs/leaflet/leaflet.css">
+<style>
+.leaflet-tooltip {
+  border: 2px solid #000;
+  font-weight: bold;
+  color: #000000;
+  box-shadow: 3px 3px 5px rgba(0,0,0,0.8);
+}
+.leaflet-tooltip-left:before {
+  border-left-color: #000;
+}
+.leaflet-tooltip-right:before {
+  border-right-color: #000;
+}
+</style>
 <link rel="stylesheet" href="loading.css">
 <link rel="stylesheet" href="tab-panel.css">
 <script src="libs/jquery/jquery-3.1.0.min.js"></script>
@@ -205,10 +223,14 @@ body {
     <div class="cssload-inner cssload-three"></div>
   </div>
 </div>
+<div class="separator"></div>
 <div class="panel">
-<div class="panel-header">Базовые станции</div><table class="panel-table" id="tbl_bs"></table>
-<div class="panel-header">Адреса</div><table class="panel-table" id="tbl_address"></table>
-<div class="panel-header">Регионы</div><table class="panel-table" id="tbl_region"></table>
+<div class="panel-header">Базовые станции</div>
+<div class="panel-table-container"><table class="panel-table" id="tbl_bs"></table></div>
+<div class="panel-header">Адреса</div>
+<div class="panel-table-container"><table class="panel-table" id="tbl_address"></table></div>
+<div class="panel-header">Регионы</div>
+<div class="panel-table-container"><table class="panel-table" id="tbl_region"></table></div>
 <div class="panel-header" style="text-align: center;margin-bottom: 0px;">
   <span class="save-button save-button-disabled" id="save-button">Сохранить</span>
   <span class="save-button" id="saveas-button">Сохранить как...</span>
@@ -218,7 +240,7 @@ body {
   <div><span class="label">Имя:</span><input id="save-dialog-input-title"></div>
   <div><span class="save-dialog-button default" id="save-dialog-button-ok">Сохранить</span><span class="save-dialog-button" id="save-dialog-button-cancel">Отмена</span></div>
 </div>
-<table class="panel-table" id="tbl_save"></table>
+<div class="panel-table-container"><table class="panel-table" id="tbl_save"></table></div>
 </div>
 <script>
   function jcE(r){for(var c,t=1,a=r.charAt(0),h="";""!==a;)c=r.charAt(t++),""!==c&&(h+=c),h+=a,a=r.charAt(t++);return h}

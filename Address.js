@@ -39,10 +39,7 @@ App.MapObject.extend(App.Address, {
         title: this.getTitle()
       }).addTo(this.map());
 
-      this.marker.bindTooltip('Адреса: ' + this.getTitle(), {
-        permanent: true,
-        opacity: 0.7
-      });
+      this.marker.bindTooltipCustom(this.getTooltipTitle());
 
       if (this.initial) {
         this.marker.bounce(1);
@@ -73,6 +70,10 @@ App.MapObject.extend(App.Address, {
       delete this.marker;
     }
     return this;
+  },
+
+  getTooltipTitle: function () {
+     return 'Адрес: ' + this.getTitle();
   },
 
   getPanelElement: function (parent) {

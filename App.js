@@ -84,7 +84,7 @@ function AppClass(){
     return this;
   };
   this.moduleLoaded = function (name) {
-  	console.log('Module loaded:', name);
+//  	console.log('Module loaded:', name);
     if (name) {
   	  loadedModules.push(name);
   	  this.moduleFireEvents();

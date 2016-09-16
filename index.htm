@@ -83,21 +83,54 @@ body {
   outline: 1px solid #000099;
   font-weight: bold;
 }
-.panel-item-close {
+/*.panel-item-close {
+} */
+.panel-item-delete {
+  -moz-border-radius: 50%;
+  -webkit-border-radius: 50%;
+  border-radius: 50%;
+  border: 1px solid #000000;
+
+  background: #888;
+  color: #fff;
+  cursor: pointer;
+  font: bold 11px Tahoma;
+  width: 11px;
+  height: 11px;
+  text-align: center;
+  line-height: 9px;
+}
+.panel-item-delete:hover {
+  background: #ff1313;
+}
+.panel-item-undo:hover {
+  background: #134eff;
+}
+.panel-item-delete:after {
+  content: "×";
+}
+.panel-item-undo:after {
+  content: '↻';
 }
 .panel-region-source {
+  -moz-border-radius: 50%;
+  -webkit-border-radius: 50%;
+  border-radius: 50%;
+  border: 1px solid #000000;
+
   font: bold 10px Tahoma;
-  width: 12px;
-  height: 12px;
+  width: 11px;
+  height: 11px;
   text-align: center;
-  vertical-align: middle;
-  line-height: 12px;
+  line-height: 11px;
 }
 .panel-region-source-ok {
-  background-image: url(images/region-ok.png);
+  background: lime;
+  border: 1px solid green;
 }
 .panel-region-source-error {
-  background-image: url(images/region-error.png);
+  background: #f30;
+  border: 1px solid red;
 }
 .save-button {
   -moz-border-radius: 7px;

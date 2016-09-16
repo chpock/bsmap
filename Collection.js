@@ -125,17 +125,9 @@ App.extend(App.Collection, {
         el.innerHTML = i+1 + '.';
         this.objects[i].getPanelElement(line);
         el = L.DomUtil.create('td','panel-column', line);
-        el.style.width = '12px';
-        icon = L.DomUtil.create('img', 'panel-item-close', el);
+        el.style.width = '13px';
+        icon = L.DomUtil.create('div', 'panel-item-delete' + (this.deleted[i] ? ' panel-item-undo' : ''), el);
         if (this.deleted[i]) {
-          icon.src = 'images/undo.png';
-          L.DomEvent.addListener(icon, 'mouseover', function(ev) {
-            ev.currentTarget.src = 'images/undo-hover.png';
-          }, this);
-          L.DomEvent.addListener(icon, 'mouseout', function(ev) {
-            ev.currentTarget.src = 'images/undo.png';
-          }, this);
-
           L.DomEvent
             .addListener(icon, 'click', L.DomEvent.stopPropagation)
             .addListener(icon, 'click', L.DomEvent.preventDefault)
@@ -143,14 +135,6 @@ App.extend(App.Collection, {
               this.collection.undelete(this);
             }, this.objects[i]);
         } else {
-          icon.src = 'images/close.png';
-          L.DomEvent.addListener(icon, 'mouseover', function(ev) {
-            ev.currentTarget.src = 'images/close-hover.png';
-          }, this);
-          L.DomEvent.addListener(icon, 'mouseout', function(ev) {
-            ev.currentTarget.src = 'images/close.png';
-          }, this);
-
           L.DomEvent
             .addListener(icon, 'click', L.DomEvent.stopPropagation)
             .addListener(icon, 'click', L.DomEvent.preventDefault)
@@ -178,18 +162,6 @@ App.extend(App.Collection, {
               }, 300, o);
             };
           })(this.objects[i], this));
-/*          L.DomEvent.addListener(line, 'mouseover', this.delayExecFunc('mouseover', function(self){
-            console.log('MOUSEOVER! cancel mouseout...');
-            self.cancelExec('mouseout', this);
-//            console.log('apply mouseover...');
-            this.onMouseOverSidebar();
-          }, 1, this.objects[i], this));
-          L.DomEvent.addListener(line, 'mouseout', this.delayExecFunc('mouseout', function(self){
-            console.log('MOUSEOUT! cancel mouseover...');
-            self.cancelExec('mouseover', this);
-//            console.log('apply mouseout...');
-            this.onMouseOutSidebar();
-          }, 1, this.objects[i], this)); */
         }
       }
     }
